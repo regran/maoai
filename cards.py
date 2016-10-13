@@ -1,4 +1,4 @@
-
+import random
 #global variables for cards
 SUITS = ('C', 'S', 'H', 'D')
 card_dict= {'A':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9, 'T':10, 'J':10, 'Q':10, 'K':10}
@@ -16,7 +16,7 @@ class Card:
             print ("Invalid card: ", suit, rank)
 
     def __str__(self):
-        return self.suit + self.rank
+        return self.rank+self.suit
 
     def get_suit(self):
         return self.suit
@@ -38,7 +38,9 @@ class Hand:
     def add_card(self, card):
         self.cards.append(card)	# add a card object to a hand
 
-        
+    def rem_card(self, card):
+        self.cards.remove(card)
+   
 # define deck class 
 class Deck:
     def __init__(self):
