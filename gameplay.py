@@ -8,6 +8,8 @@ cardsinitial=5
 hums=[]
 aiplayers=[]
 play=True
+
+
 def deal(numhum, numai, cardsphand): #The parameters are number human players, number of ai players
     global hums, aiplayers
     global deck
@@ -45,14 +47,26 @@ def penalty(who, oops): #input hand and number of penalties
     for i in range(oops):
         who.add_card(deck.deal_card())
 
+def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is
+    global hums, aiplayers,count,hums, aiplayers
+    hums=hums[::-1]
+    aiplayers=aiplayers[::-1]
+    if(ishum):
+        count=hums.index(player)
+    else:
+        count=aiplayers.index(player)
 deal(numhumans, numais,cardsinitial)
 topcard=deck.deal_card()
 while(play):
-    for hum in hums:
-        turn(hum)
-    for ai in aiplayers:
-        played=ai.turn(topcard)
+    count=0
+    while(count<len(hums)):
+        turn(hums[count])
+        count+=1
+    count=0
+    while(count<len(aiplayers)):
+        played=aiplayers[count].turn(topcard)
         if(played==topcard):
-            penalty(ai.hand, 1)
+            penalty(aiplayers[count].hand, 1)
         topcard=played
-        print(ai.hand)
+        print(aiplayers[count].hand)
+        count+=1

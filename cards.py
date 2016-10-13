@@ -16,7 +16,7 @@ class Card:
             print ("Invalid card: ", suit, rank)
 
     def __str__(self):
-        return self.rank+self.suit
+        return self.rank+':'+self.suit
 
     def get_suit(self):
         return self.suit
@@ -32,8 +32,8 @@ class Hand:
     def __str__(self):
         ans = " "
         for i in self.cards:
-            ans += " " + str(i)
-        return "Hand contains" + ans # return a string representation of a hand
+            ans +=str(i)+", "
+        return "Hand contains: " + ans # return a string representation of a hand
              
     def add_card(self, card):
         self.cards.append(card)	# add a card object to a hand
