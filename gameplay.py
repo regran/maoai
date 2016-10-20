@@ -8,17 +8,23 @@ cardsinitial=5
 hums=[]
 aiplayers=[]
 play=True
+huminplay=[] #array of booleans re: whether player is in play or skipped
+aiinplay=[]
 
+rankrules={'5': "highfive", 'K':"bow", 'Q': "bow"} #dict of rules based on rank and suit
+suitrules={'H': "ily"}
 
 def deal(numhum, numai, cardsphand): #The parameters are number human players, number of ai players
-    global hums, aiplayers
+    global hums, aiplayers, huminplay, aiinplay
     global deck
     deck=cards.Deck()
     deck.shuffle()   #make a new deck and shuffle it
     for i in range(numhum):
         hums=hums+[cards.Hand()]
+        huminplay=huminplay+[(True,0)]
     for i in range(numai):
         aiplayers=aiplayers+[AI.AIplay(cards.Hand())]
+        aiinplay=aiinplay+[(True,0)]
     for hum in hums:
         for i in range(cardsphand):
             hum.add_card(deck.deal_card())
@@ -27,46 +33,110 @@ def deal(numhum, numai, cardsphand): #The parameters are number human players, n
             ai.hand.add_card(deck.deal_card())
 
 def turn(player): #input whose turn it is
-    global topcard    
+    global topcard, play, suitrules, rankrules  
+    penalties=0
     validturn=True
     print(topcard)
     print(player)
-    move=int(input("Which card will you play? "))
-    if(move<len(player.cards) and (topcard.suit==player.cards[move].suit or topcard.rank==player.cards[move].rank)):
-        validturn=True
-    else:
+    move=input("Which card will you play? ") #player inputs index of card to play and a list of string commands
+    if(move=="gg ez"):        #im allowed to have fun in my code
+        print("wow")
+        play=False #end the game without errors
+        return
+    move=move.split()
+    card=int(move[0])
+    del move[0]
+    if(card>=len(player.cards)): #if the index is larger than the number of cards, it is not right
         validturn=False
-    if(validturn):
-        topcard=player.cards[move]
-        player.rem_card(player.cards[move])
+        penalties+=1
+        print("That isn't a card in your hand")
+
     else:
-        penalty(player,1)
+        s=player.cards[card].suit
+        r=player.cards[card].rank
+        if(topcard.suit!=s and topcard.rank!=r): #check if valid card played
+            validturn=False
+            penalties+=1
+            print("That isn't a valid card")
+        else: #check if special rules were followed
+            for i in list(rankrules.keys()):
+                if(r==i):
+                    if(not (rankrules[i] in move)):
+                        penalties+=1
+                        print("You missed a special rank action")
+                    else:
+                        del move[move.index(rankrules[i])]
+            for i in list(suitrules.keys()):
+                 if(s==i):
+                    if(not(suitrules[i] in move)):
+                        penalties+=1
+                        print("You missed a special suit action")
+                    else:
+                        del move[move.index(suitrules[i])]
+            for i in move:
+                 penalties+=1
+                 print("Unnecessary action(s)")
+    if(validturn):
+        topcard=player.cards[card]
+        player.rem_card(player.cards[card])
+    penalty(player,penalties)
+    print("You have {} penalties".format(penalties))
     print(player)
+
+def skip(ishum, howlong): #controls who is skipped for how long
+    global count, huminplay, aiinplay
+    if(ishum):
+        huminplay[count]=(False, howlong)
+    else:
+        aiinplay[count]=(False, howlong)
+
+
 
 def penalty(who, oops): #input hand and number of penalties
     for i in range(oops):
         who.add_card(deck.deal_card())
 
-def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is
-    global hums, aiplayers,count,hums, aiplayers
+def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is to reverse order of play
+    global hums, aiplayers, count
     hums=hums[::-1]
     aiplayers=aiplayers[::-1]
+    huminplay=aiinplay[::-1]
+    aiinplay=aiinplay[::-1]
     if(ishum):
         count=hums.index(player)
     else:
         count=aiplayers.index(player)
-deal(numhumans, numais,cardsinitial)
-topcard=deck.deal_card()
+
+
+
+deal(numhumans, numais,cardsinitial) #start the game by dealing
+topcard=deck.deal_card()    #draw a card from the deck
+turnnum=0
 while(play):
+    turnnum+=1
     count=0
-    while(count<len(hums)):
-        turn(hums[count])
+    while(count<len(hums)): #go through the human players and have them go
+        if(huminplay[count][0]): #skip if not in play
+            turn(hums[count])
+            if(not play):
+                break
+        else:
+            huminplay[count]=(False, huminplay[count][1]-1) #keep track of who has been skipped and for how long
+            if(huminplay[count][1]==0):
+                huminplay[count]=(True,0)
         count+=1
     count=0
-    while(count<len(aiplayers)):
-        played=aiplayers[count].turn(topcard)
-        if(played==topcard):
-            penalty(aiplayers[count].hand, 1)
-        topcard=played
-        print(aiplayers[count].hand)
+    if(not play):
+        break
+    while(count<len(aiplayers)): 
+        if(aiinplay[count][0]):
+            played=aiplayers[count].turn(topcard)
+            if(played==topcard):
+                penalty(aiplayers[count].hand, 1)
+            topcard=played
+            print(aiplayers[count].hand)
+        else:
+            aiinplay[count]=(False, aiinplay[count][1]-1)
+            if(aiinplay[count][1]==0):
+                aiinplay[count]=(True,0)
         count+=1
