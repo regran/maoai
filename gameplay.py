@@ -59,29 +59,50 @@ def turn(player): #input whose turn it is
             penalties+=1
             print("That isn't a valid card")
         else: #check if special rules were followed
-            for i in list(rankrules.keys()):
-                if(r==i):
-                    if(not (rankrules[i] in move)):
-                        penalties+=1
-                        print("You missed a special rank action")
-                    else:
-                        del move[move.index(rankrules[i])]
-            for i in list(suitrules.keys()):
-                 if(s==i):
-                    if(not(suitrules[i] in move)):
-                        penalties+=1
-                        print("You missed a special suit action")
-                    else:
-                        del move[move.index(suitrules[i])]
-            for i in move:
-                 penalties+=1
-                 print("Unnecessary action(s)")
+            penalties+=checkmoves(player.cards[card], move)
     if(validturn):
         topcard=player.cards[card]
         player.rem_card(player.cards[card])
     penalty(player,penalties)
     print("You have {} penalties".format(penalties))
     print(player)
+
+def checkmoves(card, moves): #Check if special rules were followed and return the number of penalties
+    global suitrules, rankrules
+    s=card.suit
+    r=card.rank
+    pen=0
+    for i in list(rankrules.keys()):
+        if(r==i):
+            if(not(rankrules[i] in moves)):
+                pen+=1
+                print("A special rank action was missed")
+            else:
+                del moves[moves.index(rankrules[i])]
+    for i in list (suitrules.keys()):
+        if(s==i):
+            if(not(suitrules[i] in moves)):
+                pen+=1
+                print("A special suit action was missed")
+            else:
+                del moves[moves.index(suitrules[i])]
+    for i in moves:
+            pen+=1
+            print("Unnecessary action(s)")
+    return pen
+
+def checkturn(ai, moves): #Respond appropriately to the AI's actions
+    global topcard, suitrules, rankrules
+    top, actions = moves
+    penalties=0
+    if(top==topcard): #The AI returns the topcard if it has no valid moves, and otherwise plays a valid card
+        penalties+=1 #It is penalized if it has no valid card
+        print("There was no valid card")
+    else:
+        penalties+=checkmoves(top, actions)    
+    topcard=top
+    penalty(ai, penalties)
+
 
 def skip(ishum, howlong): #controls who is skipped for how long
     global count, huminplay, aiinplay
@@ -130,10 +151,7 @@ while(play):
         break
     while(count<len(aiplayers)): 
         if(aiinplay[count][0]):
-            played=aiplayers[count].turn(topcard)
-            if(played==topcard):
-                penalty(aiplayers[count].hand, 1)
-            topcard=played
+            checkturn(aiplayers[count], aiplayers[count].turn(topcard))
             print(aiplayers[count].hand)
         else:
             aiinplay[count]=(False, aiinplay[count][1]-1)
