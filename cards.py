@@ -40,6 +40,10 @@ class Hand:
 
     def rem_card(self, card):
         self.cards.remove(card)
+    
+    def isempty(self):
+        return self.cards==[]
+
    
 # define deck class 
 class Deck:

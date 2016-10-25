@@ -145,6 +145,9 @@ while(play):
     while(count<len(hums)): #go through the human players and have them go
         if(huminplay[count][0]): #skip if not in play
             turn(hums[count])
+            if(hums[count].isempty()):
+                print("We have a winner!")
+                play=False
             if(not play):
                 break
         else:
@@ -159,6 +162,10 @@ while(play):
         if(aiinplay[count][0]):
             checkturn(aiplayers[count], aiplayers[count].turn(topcard))
             print(aiplayers[count].hand)
+            if(aiplayers[count].hand.isempty()):
+                print("GG EZ")
+                play=False
+                break
         else:
             aiinplay[count]=(False, aiinplay[count][1]-1)
             if(aiinplay[count][1]==0):
