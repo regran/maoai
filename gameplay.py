@@ -64,7 +64,10 @@ def turn(player): #input whose turn it is
         topcard=player.cards[card]
         player.rem_card(player.cards[card])
     penalty(player,penalties)
-    print("You have {} penalties".format(penalties))
+    if(penalties==1):
+        print("You have 1 penalty")
+    else:
+        print("You have {} penalties".format(penalties))
     print(player)
 
 def checkmoves(card, moves): #Check if special rules were followed and return the number of penalties
@@ -101,8 +104,11 @@ def checkturn(ai, moves): #Respond appropriately to the AI's actions
     else:
         penalties+=checkmoves(top, actions)    
     topcard=top
-    penalty(ai, penalties)
-
+    penalty(ai.hand, penalties)
+    if(penalties==1):
+        print("You have 1 penalty")
+    else:
+        print("You have {} penalties".format(penalties))
 
 def skip(ishum, howlong): #controls who is skipped for how long
     global count, huminplay, aiinplay

@@ -7,6 +7,7 @@ class AIplay:
         validturn=True
         print(topcard)
         print(self.hand)
+        actions=[]
         for card in self.hand.cards:
             if(card.rank==topcard.rank or card.suit==topcard.suit):
                 self.hand.rem_card(card)
@@ -15,4 +16,4 @@ class AIplay:
         else:
             validturn=False
 
-        return topcard
+        return topcard, actions
