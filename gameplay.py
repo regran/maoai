@@ -1,5 +1,6 @@
 import cards
 import AI
+import sklearn.preprocessing as pre
 
 numhumans=int(input("Enter number of human players: "))
 numais=int(input("Enter number of AI players: "))
@@ -13,6 +14,10 @@ aiinplay=[]
 
 rankrules={'5': "highfive", 'K':"bow", 'Q': "bow"} #dict of rules based on rank and suit
 suitrules={'H': "ily"}
+prevmovelab=[]
+prevmovefeat=[]
+feat=[]
+lab=[]
 
 def deal(numhum, numai, cardsphand): #The parameters are number human players, number of ai players
     global hums, aiplayers, huminplay, aiinplay
@@ -46,6 +51,7 @@ def turn(player): #input whose turn it is
     move=move.split()
     card=int(move[0])
     del move[0]
+    
     if(card>=len(player.cards)): #if the index is larger than the number of cards, it is not right
         validturn=False
         penalties+=1
@@ -54,6 +60,7 @@ def turn(player): #input whose turn it is
     else:
         s=player.cards[card].suit
         r=player.cards[card].rank
+        prevmovefeat+=[topcard.suit, topcard.rank, s, r] #store data about card move features
         if(topcard.suit!=s and topcard.rank!=r): #check if valid card played
             validturn=False
             penalties+=1
@@ -71,10 +78,11 @@ def turn(player): #input whose turn it is
     print(player)
 
 def checkmoves(card, moves): #Check if special rules were followed and return the number of penalties
-    global suitrules, rankrules
+    global suitrules, rankrules, prevmovelab
     s=card.suit
     r=card.rank
     pen=0
+    prevmovelab=prevmovelab+moves #store data about which commands were used this move
     for i in list(rankrules.keys()):
         if(r==i):
             if(not(rankrules[i] in moves)):
@@ -92,16 +100,18 @@ def checkmoves(card, moves): #Check if special rules were followed and return th
     for i in moves:
             pen+=1
             print("Unnecessary action(s)")
+    prevmovelab[-1]=[pen]+ prevmovelab[-1] #store data about how many penalties this move
     return pen
 
 def checkturn(ai, moves): #Respond appropriately to the AI's actions
-    global topcard, suitrules, rankrules
+    global topcard, suitrules, rankrules, prevmovefeat
     top, actions = moves
     penalties=0
     if(top==topcard): #The AI returns the topcard if it has no valid moves, and otherwise plays a valid card
         penalties+=1 #It is penalized if it has no valid card
         print("There was no valid card")
     else:
+        prevmovefeat+=[topcard.suit, topcard.rank, top.suit, top.rank] #store data about card features
         penalties+=checkmoves(top, actions)    
     topcard=top
     penalty(ai.hand, penalties)
