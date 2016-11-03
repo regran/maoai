@@ -16,8 +16,6 @@ rankrules={'5': "highfive", 'K':"bow", 'Q': "bow"} #dict of rules based on rank 
 suitrules={'H': "ily"}
 prevmovelab=[]
 prevmovefeat=[]
-feat=[]
-lab=[]
 
 def deal(numhum, numai, cardsphand): #The parameters are number human players, number of ai players
     global hums, aiplayers, huminplay, aiinplay
@@ -38,7 +36,7 @@ def deal(numhum, numai, cardsphand): #The parameters are number human players, n
             ai.hand.add_card(deck.deal_card())
 
 def turn(player): #input whose turn it is
-    global topcard, play, suitrules, rankrules  
+    global topcard, play, suitrules, rankrules, prevmovefeat, prevmovelab  
     penalties=0
     validturn=True
     print(topcard)
@@ -60,12 +58,12 @@ def turn(player): #input whose turn it is
     else:
         s=player.cards[card].suit
         r=player.cards[card].rank
-        prevmovefeat+=[topcard.suit, topcard.rank, s, r] #store data about card move features
         if(topcard.suit!=s and topcard.rank!=r): #check if valid card played
             validturn=False
             penalties+=1
             print("That isn't a valid card")
         else: #check if special rules were followed
+            prevmovefeat.append([s, r]) #store data about card move features
             penalties+=checkmoves(player.cards[card], move)
     if(validturn):
         topcard=player.cards[card]
@@ -78,11 +76,11 @@ def turn(player): #input whose turn it is
     print(player)
 
 def checkmoves(card, moves): #Check if special rules were followed and return the number of penalties
-    global suitrules, rankrules, prevmovelab
+    global suitrules, rankrules, prevmovelab, prevmovefeat
     s=card.suit
     r=card.rank
     pen=0
-    prevmovelab=prevmovelab+moves #store data about which commands were used this move
+    prevmovelab+=[moves[:]]
     for i in list(rankrules.keys()):
         if(r==i):
             if(not(rankrules[i] in moves)):
@@ -100,8 +98,12 @@ def checkmoves(card, moves): #Check if special rules were followed and return th
     for i in moves:
             pen+=1
             print("Unnecessary action(s)")
-    prevmovelab[-1]=[pen]+ prevmovelab[-1] #store data about how many penalties this move
+#   prevmovelab[-1].append(str(pen))#store data about how many penalties this move
+    if(pen>0):
+        del prevmovelab[-1]
+        del prevmovefeat[-1]
     return pen
+
 
 def checkturn(ai, moves): #Respond appropriately to the AI's actions
     global topcard, suitrules, rankrules, prevmovefeat
@@ -111,7 +113,7 @@ def checkturn(ai, moves): #Respond appropriately to the AI's actions
         penalties+=1 #It is penalized if it has no valid card
         print("There was no valid card")
     else:
-        prevmovefeat+=[topcard.suit, topcard.rank, top.suit, top.rank] #store data about card features
+        prevmovefeat.append([top.suit, top.rank]) #store data about card features
         penalties+=checkmoves(top, actions)    
     topcard=top
     penalty(ai.hand, penalties)
@@ -155,6 +157,7 @@ while(play):
     while(count<len(hums)): #go through the human players and have them go
         if(huminplay[count][0]): #skip if not in play
             turn(hums[count])
+            print()
             if(hums[count].isempty()):
                 print("We have a winner!")
                 play=False
@@ -170,8 +173,9 @@ while(play):
         break
     while(count<len(aiplayers)): 
         if(aiinplay[count][0]):
-            checkturn(aiplayers[count], aiplayers[count].turn(topcard))
+            checkturn(aiplayers[count], aiplayers[count].turn(topcard, prevmovefeat, prevmovelab))
             print(aiplayers[count].hand)
+            print()
             if(aiplayers[count].hand.isempty()):
                 print("GG EZ")
                 play=False

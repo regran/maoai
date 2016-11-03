@@ -67,3 +67,7 @@ class Deck:
             ans += str(card)
         return "Deck contains" + ans	# return a string representing the deck
 
+    def isempty(self):
+        return self.deck==[]
+
+
