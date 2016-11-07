@@ -13,15 +13,17 @@ huminplay=[] #array of booleans re: whether player is in play or skipped
 aiinplay=[]
 
 rankrules={'5': "highfive", 'K':"bow", 'Q': "bow"} #dict of rules based on rank and suit
-suitrules={'H': "ily"}
+suitrules={'H': "ily", 'S':"rave"}
 prevmovelab=[]
 prevmovefeat=[]
 
 def deal(numhum, numai, cardsphand): #The parameters are number human players, number of ai players
     global hums, aiplayers, huminplay, aiinplay
-    global deck
+    global deck, spare_deck
     deck=cards.Deck()
     deck.shuffle()   #make a new deck and shuffle it
+    spare_deck=cards.Deck()
+    spare_deck.empty()
     for i in range(numhum):
         hums=hums+[cards.Hand()]
         huminplay=huminplay+[(True,0)]
@@ -30,13 +32,17 @@ def deal(numhum, numai, cardsphand): #The parameters are number human players, n
         aiinplay=aiinplay+[(True,0)]
     for hum in hums:
         for i in range(cardsphand):
+            if(deck.isempty()):
+                deck.deck+=cards.Deck().deck
             hum.add_card(deck.deal_card())
     for ai in aiplayers:
         for i in range(cardsphand):
+            if(deck.isempty()):
+                deck.deck+=cards.Deck().deck
             ai.hand.add_card(deck.deal_card())
 
 def turn(player): #input whose turn it is
-    global topcard, play, suitrules, rankrules, prevmovefeat, prevmovelab  
+    global topcard, play, suitrules, rankrules, prevmovefeat, prevmovelab, spare_deck
     penalties=0
     validturn=True
     print(topcard)
@@ -67,6 +73,7 @@ def turn(player): #input whose turn it is
             penalties+=checkmoves(player.cards[card], move)
     if(validturn):
         topcard=player.cards[card]
+        spare_deck.add_card(topcard)
         player.rem_card(player.cards[card])
     penalty(player,penalties)
     if(penalties==1):
@@ -106,7 +113,7 @@ def checkmoves(card, moves): #Check if special rules were followed and return th
 
 
 def checkturn(ai, moves): #Respond appropriately to the AI's actions
-    global topcard, suitrules, rankrules, prevmovefeat
+    global topcard, suitrules, rankrules, prevmovefeat, spare_deck
     top, actions = moves
     penalties=0
     if(top==topcard): #The AI returns the topcard if it has no valid moves, and otherwise plays a valid card
@@ -115,7 +122,10 @@ def checkturn(ai, moves): #Respond appropriately to the AI's actions
     else:
         prevmovefeat.append([top.suit, top.rank]) #store data about card features
         penalties+=checkmoves(top, actions)    
+        spare_deck.add_card(top)
     topcard=top
+
+    
     penalty(ai.hand, penalties)
     if(penalties==1):
         print("You have 1 penalty")
@@ -132,7 +142,13 @@ def skip(ishum, howlong): #controls who is skipped for how long
 
 
 def penalty(who, oops): #input hand and number of penalties
+    global deck, spare_deck
     for i in range(oops):
+        if(deck.isempty()):
+            deck.deck=spare_deck.deck
+            deck.shuffle()
+            spare_deck=cards.Deck()
+            spare_deck.empty()
         who.add_card(deck.deal_card())
 
 def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is to reverse order of play
