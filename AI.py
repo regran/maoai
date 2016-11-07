@@ -47,8 +47,9 @@ class AIplay:
                 break
         else:
             return []
-
-        [words]= self.le.inverse_transform(np.array([Y])) #get predicted labels and transform them into tuple of action strings
+        if((Y.ndim==1)):
+            Y=np.array([Y])
+        [words]= self.le.inverse_transform(np.array(Y)) #get predicted labels and transform them into tuple of action strings
         return list(words) #wrap tuple as a list. im sorry this is, many gross conversions
     
     
