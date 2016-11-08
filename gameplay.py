@@ -172,6 +172,7 @@ while(play):
     count=0
     while(count<len(hums)): #go through the human players and have them go
         if(huminplay[count][0]): #skip if not in play
+            print("Human Player {}".format(count+1))
             turn(hums[count])
             print()
             if(hums[count].isempty()):
@@ -189,6 +190,7 @@ while(play):
         break
     while(count<len(aiplayers)): 
         if(aiinplay[count][0]):
+            print("AI Player {}".format(count+1))
             checkturn(aiplayers[count], aiplayers[count].turn(topcard, prevmovefeat, prevmovelab))
             print(aiplayers[count].hand)
             print()
