@@ -12,8 +12,8 @@ play=True
 huminplay=[] #array of booleans re: whether player is in play or skipped
 aiinplay=[]
 
-rankrules={'5': "highfive", 'K':"bow", 'Q': "bow"} #dict of rules based on rank and suit
-suitrules={'H': "ily", 'S':"rave"}
+rankrules={'5': "highfive", 'K':"bow", 'Q': "bow", '7':'nice'} #dict of rules based on rank and suit
+suitrules={'H': "ily", 'S':"rave", 'D':'sparkly'}
 prevmovelab=[]
 prevmovefeat=[]
 
