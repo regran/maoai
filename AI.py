@@ -23,9 +23,6 @@ class AIplay:
                 prefeat[feat][f+1]=self.featrankdict[prefeat[feat][f+1]]
         X=self.enc.fit_transform(prefeat).toarray()
         Y=self.le.fit_transform(prelab)
-       # if(len(prefeat)==1): #reshape if there's only one sample
-        #    X.reshape(1,-1)
-         #   Y.reshape(1,-1)
         return X, Y
 
     def update(self, feat, lab):
@@ -39,8 +36,8 @@ class AIplay:
             self.featrankdict.setdefault(X[f+1], len(self.featrankdict))
             X[f]=self.featsuitdict[X[f]]
             X[f+1]=self.featrankdict[X[f+1]]
+        X=np.array(X).reshape(1,-1)
         X=self.enc.transform(X).toarray()
-   #     X.reshape(1,-1)
         Y=self.clf.predict(X)
         for y in Y:
             if (np.count_nonzero(y)>0):
