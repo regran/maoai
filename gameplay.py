@@ -72,8 +72,8 @@ def turn(player): #input whose turn it is
             prevmovefeat.append([s, r]) #store data about card move features
             penalties+=checkmoves(player.cards[card], move)
     if(validturn):
-        topcard=player.cards[card]
         spare_deck.add_card(topcard)
+        topcard=player.cards[card]
         player.rem_card(player.cards[card])
     penalty(player,penalties)
     if(penalties==1):
@@ -122,7 +122,7 @@ def checkturn(ai, moves): #Respond appropriately to the AI's actions
     else:
         prevmovefeat.append([top.suit, top.rank]) #store data about card features
         penalties+=checkmoves(top, actions)    
-        spare_deck.add_card(top)
+        spare_deck.add_card(topcard)
     topcard=top
 
     
@@ -145,10 +145,12 @@ def penalty(who, oops): #input hand and number of penalties
     global deck, spare_deck
     for i in range(oops):
         if(deck.isempty()):
-            deck.deck=spare_deck.deck
+            deck=spare_deck
             deck.shuffle()
             spare_deck=cards.Deck()
             spare_deck.empty()
+            if(deck.isempty()):
+                deck=cards.Deck()
         who.add_card(deck.deal_card())
 
 def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is to reverse order of play
