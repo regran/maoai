@@ -3,11 +3,55 @@ import sklearn.tree as sk
 import sklearn.preprocessing as pre
 import numpy as np
 
-class AIplay:
+class AI:
+    """AI superclass for hands and card selection of all AIs"""
+    def __init__(self, h):
+        self.hand = h
+
+    def card_select(self, topcard):
+        """Play an appropriate card, if there is one"""
+        print(topcard)
+        print(self.hand)
+        validturn = True
+        for card in self.hand.cards:
+            if card.rank == topcard.rank or card.suit == topcard.suit:
+                self.hand.rem_card(card)
+                print("Card played is {}".format(card))
+                topcard = card
+                break
+        else:
+            validturn = False
+        return topcard, validturn
+
+class AIperf(AI):
+    """AI that already knows the rules of Mao"""
+    def __init__(self, h, rankr, suitr):
+        super(AIperf, self).__init__(h)
+        self.hand = h
+        self.r = rankr
+        self.s = suitr
+
+    def turn(self, topcard, f, l):
+        """Perform a turn, playing an appropriate card and following all rules"""
+        card, validturn = self.card_select(topcard)
+        actions = []
+        if validturn:
+            r = card.rank
+            s = card.suit
+            for i in list(self.r.keys()):
+                if r == i:
+                    actions += [self.r[i]]
+            for i in list(self.s.keys()):
+                if s == i:
+                    actions += [self.s[i]]
+        print("The actions are: ", actions)
+        return card, actions
+
+class AIplay(AI):
     """AI that learns to play Mao from previous correct moves"""
     def __init__(self, h):
         """Initialize AI with a hand."""
-        self.hand = h
+        super(AIplay, self).__init__(h)
         self.clf = sk.DecisionTreeClassifier()
         self.le = pre.MultiLabelBinarizer()
         self.enc = pre.OneHotEncoder(n_values=[4, 13]) #there are 4 suits and 13 ranks
@@ -60,20 +104,12 @@ class AIplay:
         return list(words) #wrap tuple as a list. im sorry this is, many gross conversions
 
     def turn(self, topcard, f, l):
-        """Choose an appropriate card and predicts actions"""
-        validturn = True
-        print(topcard)
-        print(self.hand)
+        """Choose an appropriate card and predict actions"""
         actions = []
-        for card in self.hand.cards:
-            if card.rank == topcard.rank or card.suit == topcard.suit:
-                self.hand.rem_card(card)
-                X = [card.suit, card.rank]
-                print("Card played is {}".format(card))
-                topcard = card
-                break
-        else:
-            validturn = False
+        topcard, validturn = self.card_select(topcard)
+        X = [topcard.suit, topcard.rank]
+        if not validturn:
+            return topcard, actions
         for y in l:
             if y != []:
                 break

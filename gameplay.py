@@ -3,7 +3,8 @@ import cards
 import AI
 
 numhumans = int(input("Enter number of human players: "))
-numais = int(input("Enter number of AI players: "))
+numais = int(input("Enter number of new AI players: "))
+numperf = int(input("Enter number of perfect AIs: "))
 numplayers = numhumans+numais
 cardsinitial = 5
 hums = []
@@ -16,8 +17,8 @@ rankrules = {'5': "highfive", 'K':"bow", 'Q': "bow", '7':'nice'}
 suitrules = {'H': "ily", 'S':"rave", 'D':'sparkly'}
 prevmovelab = []
 prevmovefeat = []
-spare_deck=None
-deck=None
+spare_deck = None
+deck = None
 
 def deal(numhum, numai, cardsphand): #The parameters are number human players, number of ai players
     """Initiate a game, asking how many players there are and dealing cards"""
@@ -33,6 +34,9 @@ def deal(numhum, numai, cardsphand): #The parameters are number human players, n
     for i in range(numai):
         aiplayers = aiplayers+[AI.AIplay(cards.Hand())]
         aiinplay = aiinplay+[(True, 0)]
+    for i in range(numperf):
+        aiplayers += [AI.AIperf(cards.Hand(), rankrules, suitrules)]
+        aiinplay += [(True, 0)]
     for hum in hums:
         for i in range(cardsphand):
             if deck.isempty():
