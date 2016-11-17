@@ -2,14 +2,24 @@
 import cards
 import AI
 
-numhumans = int(input("Enter number of human players: "))
-numais = int(input("Enter number of new AI players: "))
-numperf = int(input("Enter number of perfect AIs: "))
+play = True
+try:
+    numhumans = int(input("Enter number of human players: "))
+    numais = int(input("Enter number of new AI players: "))
+    numperf = int(input("Enter number of perfect AIs: "))
+except ValueError:
+    print("A number was expected.")
+    play = False
+    exit()
+if numhumans < 0 or numais < 0 or numperf < 0 or (numhumans + numais + numperf < 2):
+    print("That isn't a valid number of players.")
+    play = False
+    exit()
+
 numplayers = numhumans+numais
 cardsinitial = 5
 hums = []
 aiplayers = []
-play = True
 huminplay = [] #array of booleans re: whether player is in play or skipped
 aiinplay = []
 #dicts of rules based on rank and suit
@@ -54,30 +64,42 @@ def turn(player): #input whose turn it is
     penalties = 0
     validturn = True
     print(topcard)
+    digit = False
     print(player)
-    move = input("Which card will you play? ")
-    #player inputs index of card to play and a list of string commands
-    if move == "gg ez":        #im allowed to have fun in my code
-        print("wow")
-        play = False #end the game without errors
-        return
-    move = move.split()
-    card = int(move[0])
-    del move[0]
-    if card >= len(player.cards): #if the index is larger than the number of cards, it is not right
-        validturn = False
-        penalties += 1
-        print("That isn't a card in your hand")
+    while not digit:
+        move = input("Which card will you play? ")
+        #player inputs index of card to play and a list of string commands
+        if move == "gg ez":        #im allowed to have fun in my code
+            print("wow")
+            play = False #end the game without errors
+            return
+        move = move.split()
+        if move == []:
+            validturn = False
+            print("No card was played")
+            penalties += 1
+            break
+        if move[0].isdigit():
+            card = int(move[0])
+            del move[0]
+            digit = True
+        else:
+            print("A positive integer was expected as your first word. Please try again.")
     else:
-        s = player.cards[card].suit
-        r = player.cards[card].rank
-        if topcard.suit != s and topcard.rank != r: #check if valid card played
+        if card >= len(player.cards): #check if index of card in hand
             validturn = False
             penalties += 1
-            print("That isn't a valid card")
-        else: #check if special rules were followed
-            prevmovefeat.append([s, r]) #store data about card move features
-            penalties += checkmoves(player.cards[card], move)
+            print("That isn't a card in your hand")
+        else:
+            s = player.cards[card].suit
+            r = player.cards[card].rank
+            if topcard.suit != s and topcard.rank != r: #check if valid card played
+                validturn = False
+                penalties += 1
+                print("That isn't a valid card")
+            else: #check if special rules were followed
+                prevmovefeat.append([s, r]) #store data about card move features
+                penalties += checkmoves(player.cards[card], move)
     if validturn:
         spare_deck.add_card(topcard)
         topcard = player.cards[card]
