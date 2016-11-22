@@ -2,6 +2,7 @@
 import sklearn.tree as sk
 import sklearn.preprocessing as pre
 import numpy as np
+import pydotplus
 
 class AI:
     """AI superclass for hands and card selection of all AIs"""
@@ -47,6 +48,10 @@ class AIperf(AI):
         print("The actions are: ", actions)
         return card, actions
 
+    def drawtree(self):
+        """Does nothing actually. Sorry."""
+        return "tree"
+
 class AIplay(AI):
     """AI that learns to play Mao from previous correct moves"""
     def __init__(self, h):
@@ -77,6 +82,18 @@ class AIplay(AI):
         """Fit AI to current data."""
         (feat, lab) = self.prep(feat, lab)
         self.clf.fit(feat, lab)
+
+    def drawtree(self):
+        print("Trying to draw a tree")
+        dot_data = sk.export_graphviz(self.clf, out_file=None,
+                            class_names=self.le.classes_,
+                            filled=True, rounded=True,
+                            special_characters=True)
+        print("Tree?")
+        graph = pydotplus.graph_from_dot_data(dot_data)
+        print("Tree!")
+        graph.write_pdf("mao.pdf") 
+        print("Trees.... They, are, usssss.....")
 
     def predict(self, X, feat, lab):
         """Predict what actions to take based on X.

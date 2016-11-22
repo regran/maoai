@@ -232,3 +232,5 @@ while play:
             if aiinplay[count][1] == 0:
                 aiinplay[count] = (True, 0)
         count += 1
+for i in range(numais):
+    aiplayers[i].drawtree()
