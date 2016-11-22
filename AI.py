@@ -32,7 +32,7 @@ class AIperf(AI):
         self.r = rankr
         self.s = suitr
 
-    def turn(self, topcard, f, l):
+    def turn(self, topcard, f, l, w, wl):
         """Perform a turn, playing an appropriate card and following all rules"""
         card, validturn = self.card_select(topcard)
         actions = []
@@ -47,10 +47,6 @@ class AIperf(AI):
                     actions += [self.s[i]]
         print("The actions are: ", actions)
         return card, actions
-
-    def drawtree(self):
-        """Does nothing actually. Sorry."""
-        return "tree"
 
 class AIplay(AI):
     """AI that learns to play Mao from previous correct moves"""
@@ -101,6 +97,7 @@ class AIplay(AI):
         X is [topcard.suit, topcard.rank, top.suit, top.rank]
         feat and lab are unprocessed info about previous moves"""
         self.update(feat, lab)
+        X = X[:]
         for f in range(0, 2, 2): #replace feature strings with numbers
             self.featsuitdict.setdefault(X[f], len(self.featsuitdict))
             self.featrankdict.setdefault(X[f+1], len(self.featrankdict))
@@ -120,7 +117,7 @@ class AIplay(AI):
         #get predicted labels and transform them into tuple of action strings
         return list(words) #wrap tuple as a list. im sorry this is, many gross conversions
 
-    def turn(self, topcard, f, l):
+    def turn(self, topcard, f, l, wf, wl):
         """Choose an appropriate card and predict actions"""
         actions = []
         topcard, validturn = self.card_select(topcard)
@@ -138,3 +135,42 @@ class AIplay(AI):
             actions = self.predict(X, f, l)
             print("Predicted actions are {}".format(actions))
         return topcard, actions
+
+
+class AImistake(AIplay):
+    """AI that learns from its mistakes by comparing
+    predictions for correct moves with predictions for incorrect moves"""
+    def __init__(self, h):
+        """Initialize AI with a hand."""
+        super(AImistake, self).__init__(h)
+
+    def turn(self, topcard, f, l, wf, wl):
+        """Predict both correct and incorrect actions"""
+        actions = []
+        topcard, validturn = self.card_select(topcard)
+        X=[topcard.suit, topcard.rank]
+        if not validturn:
+            return topcard, actions
+        for y in l:
+            if y!= []:
+                break
+        else:
+            return topcard, []
+        if validturn and f!= []:
+            print("The previous features are", f)
+            print("The previous labels are", l)
+            actions = self.predict(X, f, l)
+            print("The previous wrong features are", wf)
+            print("The previous wrong labels are", wl)
+            for y in wl:
+                if y!= []:
+                    break
+            else:
+                return topcard, actions
+            wrongacts = self.predict(X, wf, wl)
+            print("Predicted actions are {} and predicted incorrect actions are {}".format(actions, wrongacts))
+            if wrongacts == actions:
+                actions = []
+        return topcard, actions
+
+

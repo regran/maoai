@@ -7,16 +7,17 @@ try:
     numhumans = int(input("Enter number of human players: "))
     numais = int(input("Enter number of new AI players: "))
     numperf = int(input("Enter number of perfect AIs: "))
+    numnew = int(input("Enter number of experimental AIs: "))
 except ValueError:
     print("A number was expected.")
     play = False
     exit()
-if numhumans < 0 or numais < 0 or numperf < 0 or (numhumans + numais + numperf < 2):
+if numhumans < 0 or numais < 0 or numperf < 0 or numnew < 0 or (numhumans + numais + numperf + numnew < 2):
     print("That isn't a valid number of players.")
     play = False
     exit()
 
-numplayers = numhumans+numais
+numplayers = numhumans+numais+numperf+numnew
 cardsinitial = 5
 hums = []
 aiplayers = []
@@ -25,8 +26,10 @@ aiinplay = []
 #dicts of rules based on rank and suit
 rankrules = {'5': "highfive", 'K':"bow", 'Q': "bow", '7':'nice'}
 suitrules = {'H': "ily", 'S':"rave", 'D':'sparkly'}
-prevmovelab = []
+prevmovelab = [] #labels and features for correct moves
 prevmovefeat = []
+wrongmovelab = [] #labels and features for incorrect moves
+wrongmovefeat = []
 spare_deck = None
 deck = None
 
@@ -46,6 +49,9 @@ def deal(numhum, numai, cardsphand): #The parameters are number human players, n
         aiinplay = aiinplay+[(True, 0)]
     for i in range(numperf):
         aiplayers += [AI.AIperf(cards.Hand(), rankrules, suitrules)]
+        aiinplay += [(True, 0)]
+    for i in range(numnew):
+        aiplayers += [AI.AImistake(cards.Hand())]
         aiinplay += [(True, 0)]
     for hum in hums:
         for i in range(cardsphand):
@@ -137,6 +143,8 @@ def checkmoves(card, moves):
         print("Unnecessary action(s)")
 #   prevmovelab[-1].append(str(pen))#store data about how many penalties this move
     if pen > 0:
+        wrongmovelab.append(prevmovelab[-1])
+        wrongmovefeat.append(prevmovefeat[-1])
         del prevmovelab[-1]
         del prevmovefeat[-1]
     return pen
@@ -220,7 +228,7 @@ while play:
     while count < len(aiplayers):
         if aiinplay[count][0]:
             print("AI Player {}".format(count+1))
-            checkturn(aiplayers[count], aiplayers[count].turn(topcard, prevmovefeat, prevmovelab))
+            checkturn(aiplayers[count], aiplayers[count].turn(topcard, prevmovefeat, prevmovelab, wrongmovefeat, wrongmovelab))
             print(aiplayers[count].hand)
             print()
             if aiplayers[count].hand.isempty():
