@@ -1,7 +1,10 @@
 """Play the card game Mao"""
 import cards
 import AI
+import pygame
+pygame.init()
 
+bg = 14, 144, 14 #background color
 play = True
 try:
     numhumans = int(input("Enter number of human players: "))
@@ -29,17 +32,19 @@ prevmovelab = []
 prevmovefeat = []
 spare_deck = None
 deck = None
+deckpos = (cards.width/2-cards.CARDW/2-50, cards.height/2-cards.CARDH/2)
+handpos = (100, 900) 
 
 def deal(numhum, numai, cardsphand): #The parameters are number human players, number of ai players
     """Initiate a game, asking how many players there are and dealing cards"""
     global hums, aiplayers, huminplay, aiinplay
     global deck, spare_deck
-    deck = cards.Deck()
+    deck = cards.Deck(pos=deckpos)
     deck.shuffle()   #make a new deck and shuffle it
-    spare_deck = cards.Deck()
+    spare_deck = cards.Deck(pos=deckpos)
     spare_deck.empty()
     for i in range(numhum):
-        hums = hums+[cards.Hand()]
+        hums = hums+[cards.Hand(pos=handpos)]
         huminplay = huminplay+[(True, 0)]
     for i in range(numai):
         aiplayers = aiplayers+[AI.AIplay(cards.Hand())]
@@ -64,8 +69,11 @@ def turn(player): #input whose turn it is
     penalties = 0
     validturn = True
     print(topcard)
+    cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))
     digit = False
     print(player)
+    cards.screen.blit(player.image, player.rect)
+    pygame.display.flip()
     while not digit:
         move = input("Which card will you play? ")
         #player inputs index of card to play and a list of string commands
@@ -110,6 +118,9 @@ def turn(player): #input whose turn it is
     else:
         print("You have {} penalties".format(penalties))
     print(player)
+    cards.screen.blit(player.image, player.rect)
+    pygame.display.flip()
+
 
 def checkmoves(card, moves):
     """Check if special rules were followed and return the number of penalties"""
@@ -174,11 +185,13 @@ def penalty(who, oops): #input hand and number of penalties
         if deck.isempty(): #check if the deck is empty
             deck = spare_deck #either use previously played cards or, if none, add a new deck
             deck.shuffle()
-            spare_deck = cards.Deck()
+            spare_deck = cards.Deck(pos=deckpos)
             spare_deck.empty()
             if deck.isempty():
-                deck = cards.Deck()
-        who.add_card(deck.deal_card())
+                deck = cards.Deck(pos=deckpos)
+        c = (deck.deal_card())
+        cut(who, c.image)
+        who.add_card(c)
 
 def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is
     """Reverse the order of play at current player"""
@@ -195,6 +208,28 @@ def reversal(ishum, player): #input True if hum and false if AI, and the player 
 deal(numhumans, numais, cardsinitial) #start the game by dealing
 topcard = deck.deal_card()    #draw a card from the deck
 turnnum = 0 #count the number of turns
+cards.screen.fill(bg)
+cards.screen.blit(deck.image, deck.rect)
+pygame.display.flip()
+
+def cut(player, cardimage):
+    """Move card from deck to player's hand"""
+    cardrect = deck.rect.copy()
+    goal = (player.rect.x+player.posempty[0], player.rect.y+player.posempty[1])
+    speed = [(goal[0]-cardrect[0])/50, (goal[1]-cardrect[1])/50]
+    eraser = pygame.Surface((cards.CARDW, cards.CARDH))
+    eraser.fill(bg)
+    print(player.posempty)
+    while(cardrect.x > goal[0]):
+        cards.screen.blit(deck.image, deck.rect)
+        cards.screen.blit(cardimage, cardrect)
+        print("{}, {}".format(cardrect.x, cardrect.y))
+        pygame.display.flip()
+        cards.screen.blit(eraser, cardrect)
+        cardrect = cardrect.move(speed)
+
+
+
 while play:
     turnnum += 1
     count = 0
@@ -232,3 +267,4 @@ while play:
             if aiinplay[count][1] == 0:
                 aiinplay[count] = (True, 0)
         count += 1
+        
