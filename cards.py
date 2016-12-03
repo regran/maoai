@@ -38,6 +38,7 @@ class Card(pygame.sprite.Sprite):
             self.rank = None
             print("Invalid card: ", suit, rank)
         self.rect = self.image.get_rect()
+        self.isback = False
 
     def flip(self):
         if not self.isback:

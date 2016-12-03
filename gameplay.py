@@ -212,7 +212,11 @@ def penalty(who, oops): #input hand and number of penalties
             if deck.isempty():
                 deck = cards.Deck(pos=deckpos)
         c = (deck.deal_card())
+        if who.rect.y == 100: #check if AI
+            c.flip()
         cut(who, c.image)
+        if who.rect.y == 100:
+            c.flip () #so AI will play card flipped correctly
         who.add_card(c)
 
 def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is
@@ -245,17 +249,13 @@ def cut(player, cardimage):
     eraser.fill(bg)
     prevdisty = abs(cardrect.y - goal[1])
     prevdistx = abs(cardrect.x - goal[0])
-    print(speed)
-    print(goal)
     while(prevdisty >= abs(cardrect.y - goal[1]) and prevdistx >= abs(cardrect.x - goal[0])):
         eraser.blit(cards.screen, (0, 0), (cardrect.x, cardrect.y, cards.CARDW, cards.CARDH))
         cards.screen.blit(cardimage, cardrect)
-        print("{}, {}".format(cardrect.x, cardrect.y))
         pygame.display.flip()
         cards.screen.blit(eraser, cardrect)
         prevdisty = abs(cardrect.y - goal[1])
         prevdistx = abs(cardrect.x - goal[0])
-
         cardrect = cardrect.move(speed)
 
 while play:
