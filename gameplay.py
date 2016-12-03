@@ -92,7 +92,7 @@ def turn(player): #input whose turn it is
         ai.hand.rect.x = handpos[0] + i*(cards.CARDW+50)
         ai.hand.rect.y = 100
         cards.screen.blit(cards.cardback, ai.hand.rect)
-        font.render_to(cards.screen, (handpos[0]+20+i*(cards.CARDW+50), 105), str(len(hum.cards)), fgcolor=black)
+        font.render_to(cards.screen, (handpos[0]+20+i*(cards.CARDW+50), 105), str(len(ai.hand.cards)), fgcolor=black)
         i += 1
 
     pygame.display.flip()
