@@ -21,6 +21,7 @@ class AI:
                 break
         else:
             validturn = False
+        self.hand.posempty = (0, 0)
         return topcard, validturn
 
 class AIperf(AI):

@@ -78,6 +78,8 @@ class Hand(pygame.sprite.Sprite):
         self.cards.append(card)	# add a card object to a hand
         self.numcard += 1
         self.image.blit(card.image, self.posempty)
+        card.rect.x = self.rect.x + self.posempty[0]
+        card.rect.y = self.rect.y + self.posempty[1]
         self.posempty = (self.posempty[0]+CARDW/3, 0)
 
     def rem_card(self, card):
@@ -96,7 +98,7 @@ class Hand(pygame.sprite.Sprite):
 
 class Deck(pygame.sprite.Sprite):
     """A traditional deck of playing cards (without jokers)"""
-    def __init__(self, pos):
+    def __init__(self, pos=(0,0)):
         self.deck = []	# create a Deck object
         for suit in SUITS:
             for rank in RANKS:

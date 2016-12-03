@@ -2,8 +2,15 @@
 import cards
 import AI
 import pygame
+import pygame.freetype
+import math
 pygame.init()
 
+red = 255, 0, 0
+blue = 0, 0, 255
+green = 0, 255, 0
+black = 0, 0, 0
+white = 0, 0, 0
 bg = 14, 144, 14 #background color
 play = True
 try:
@@ -34,6 +41,7 @@ spare_deck = None
 deck = None
 deckpos = (cards.width/2-cards.CARDW/2-50, cards.height/2-cards.CARDH/2)
 handpos = (100, 900) 
+font = pygame.freetype.SysFont('opensans', 50)
 
 def deal(numhum, numai, cardsphand): #The parameters are number human players, number of ai players
     """Initiate a game, asking how many players there are and dealing cards"""
@@ -73,6 +81,20 @@ def turn(player): #input whose turn it is
     digit = False
     print(player)
     cards.screen.blit(player.image, player.rect)
+    i = 0
+    for hum in hums:
+        if hum == player:
+            continue
+        cards.screen.blit(cards.cardback, (handpos[0]+i*(cards.CARDW+50), 100))
+        font.render_to(cards.screen, (handpos[0]+20+i*(cards.CARDW+50), 105), str(len(hum.cards)), fgcolor=black)
+        i += 1
+    for ai in aiplayers:
+        ai.hand.rect.x = handpos[0] + i*(cards.CARDW+50)
+        ai.hand.rect.y = 100
+        cards.screen.blit(cards.cardback, ai.hand.rect)
+        font.render_to(cards.screen, (handpos[0]+20+i*(cards.CARDW+50), 105), str(len(hum.cards)), fgcolor=black)
+        i += 1
+
     pygame.display.flip()
     while not digit:
         move = input("Which card will you play? ")
@@ -216,19 +238,25 @@ def cut(player, cardimage):
     """Move card from deck to player's hand"""
     cardrect = deck.rect.copy()
     goal = (player.rect.x+player.posempty[0], player.rect.y+player.posempty[1])
-    speed = [(goal[0]-cardrect[0])/50, (goal[1]-cardrect[1])/50]
+    pygame.display.flip()
+    speed = [(goal[0]-cardrect.x), (goal[1]-cardrect.y)]
+    speed = [speed[0]/math.sqrt(math.pow(speed[0],2)+math.pow(speed[1],2))*20, speed[1]/math.sqrt(math.pow(speed[0],2)+math.pow(speed[1],2))*20]
     eraser = pygame.Surface((cards.CARDW, cards.CARDH))
     eraser.fill(bg)
-    print(player.posempty)
-    while(cardrect.x > goal[0]):
-        cards.screen.blit(deck.image, deck.rect)
+    prevdisty = abs(cardrect.y - goal[1])
+    prevdistx = abs(cardrect.x - goal[0])
+    print(speed)
+    print(goal)
+    while(prevdisty >= abs(cardrect.y - goal[1]) and prevdistx >= abs(cardrect.x - goal[0])):
+        eraser.blit(cards.screen, (0, 0), (cardrect.x, cardrect.y, cards.CARDW, cards.CARDH))
         cards.screen.blit(cardimage, cardrect)
         print("{}, {}".format(cardrect.x, cardrect.y))
         pygame.display.flip()
         cards.screen.blit(eraser, cardrect)
+        prevdisty = abs(cardrect.y - goal[1])
+        prevdistx = abs(cardrect.x - goal[0])
+
         cardrect = cardrect.move(speed)
-
-
 
 while play:
     turnnum += 1
@@ -253,6 +281,9 @@ while play:
     if not play:
         break
     while count < len(aiplayers):
+        eraser = pygame.Surface((cards.width, cards.CARDH))
+        eraser.fill(bg)
+    #    cards.screen.blit(eraser, handpos) 
         if aiinplay[count][0]:
             print("AI Player {}".format(count+1))
             checkturn(aiplayers[count], aiplayers[count].turn(topcard, prevmovefeat, prevmovelab))
