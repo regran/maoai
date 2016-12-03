@@ -283,7 +283,7 @@ while play:
     while count < len(aiplayers):
         eraser = pygame.Surface((cards.width, cards.CARDH))
         eraser.fill(bg)
-    #    cards.screen.blit(eraser, handpos) 
+        cards.screen.blit(eraser, handpos) 
         if aiinplay[count][0]:
             print("AI Player {}".format(count+1))
             checkturn(aiplayers[count], aiplayers[count].turn(topcard, prevmovefeat, prevmovelab))
