@@ -16,15 +16,46 @@ if numhumans < 0 or numais < 0 or numperf < 0 or (numhumans + numais + numperf <
     play = False
     exit()
 
+#dicts of default rules based on rank and suit
+rankrules = {'5': "highfive", 'K':"bow", 'Q': "bow", '7':'nice'}
+suitrules = {'H': "ily", 'S':"rave", 'D':'sparkly'}
+
+inp = input("Would you like a custom set of rules? (Y/N) If no, a default will be used.").lower()
+if inp == "y":
+    rankrules = {}
+    suitrules = {}
+    print("""
+    Enter rules in the format \"(Rank/Suit) (Rule)\"
+    For example, \"5 highfive\"
+    Suits are {}
+    Ranks are {}
+    There can only be one rule per suit or rank.
+    Enter \"Start\" to finish rule entry and begin the game""".format(cards.SUITS, cards.RANKS))
+    while True:
+        inp = input("Rule: ").split()
+        if inp[0] == "Start":
+            break
+        if len(inp) != 2:
+            print("Two words were expected. Please try again or say \"Start\"")
+            continue
+        if inp[0] in cards.SUITS: 
+            suitrules.update({inp[0]:inp[1]})
+        elif inp[0] in cards.RANKS:
+            rankrules.update({inp[0]:inp[1]})
+        else:
+            print("That is not a valid suit or rank. Note that entry is case sensitive.  Please try again or say \"Start\"")
+            continue 
+elif not inp=='n':
+    print("Y/N was expected.")
+    exit()
+    
+
 numplayers = numhumans+numais
 cardsinitial = 5
 hums = []
 aiplayers = []
 huminplay = [] #array of booleans re: whether player is in play or skipped
 aiinplay = []
-#dicts of rules based on rank and suit
-rankrules = {'5': "highfive", 'K':"bow", 'Q': "bow", '7':'nice'}
-suitrules = {'H': "ily", 'S':"rave", 'D':'sparkly'}
 prevmovelab = []
 prevmovefeat = []
 spare_deck = None

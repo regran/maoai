@@ -4,7 +4,7 @@ import random
 SUITS = ('C', 'S', 'H', 'D')
 VALUES = {'A':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,
           'T':10, 'J':10, 'Q':10, 'K':10}
-RANKS = VALUES.keys()
+RANKS = ('1', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K')
 
 class Card:
     """Store a suit and rank for a traditional playing card"""
