@@ -13,6 +13,11 @@ black = 0, 0, 0
 white = 0, 0, 0
 bg = 14, 144, 14 #background color
 play = True
+
+
+cards.screen.fill(bg)
+pygame.display.update()
+clock = pygame.time.Clock()
 try:
     numhumans = int(input("Enter number of human players: "))
     numais = int(input("Enter number of new AI players: "))
@@ -104,29 +109,30 @@ def deal(numhum, numai, cardsphand): #The parameters are number human players, n
 
 def turn(player): #input whose turn it is
     """Get input from player about move and process the player's decision based on game rules"""
-    global topcard, play
+    global topcard, play, updatedareas
     penalties = 0
     validturn = True
     print(topcard)
-    cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))
+    updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))]
     digit = False
     print(player)
-    cards.screen.blit(player.image, player.rect)
+    updatedareas += [cards.screen.blit(player.image, player.rect)]
     i = 0
     for hum in hums:
         if hum == player:
             continue
-        cards.screen.blit(cards.cardback, (handpos[0]+i*(cards.CARDW+50), 100))
+        updatedareas += [cards.screen.blit(cards.cardback, (handpos[0]+i*(cards.CARDW+50), 100))]
         font.render_to(cards.screen, (handpos[0]+20+i*(cards.CARDW+50), 105), str(len(hum.cards)), fgcolor=black)
         i += 1
     for ai in aiplayers:
         ai.hand.rect.x = handpos[0] + i*(cards.CARDW+50)
         ai.hand.rect.y = 100
-        cards.screen.blit(cards.cardback, ai.hand.rect)
+        updatedareas += [cards.screen.blit(cards.cardback, ai.hand.rect)]
         font.render_to(cards.screen, (handpos[0]+20+i*(cards.CARDW+50), 105), str(len(ai.hand.cards)), fgcolor=black)
         i += 1
 
-    pygame.display.flip()
+    pygame.display.update(updatedareas)
+    updatedareas = []
     while not digit:
         move = input("Which card will you play? ")
         #player inputs index of card to play and a list of string commands
@@ -171,8 +177,9 @@ def turn(player): #input whose turn it is
     else:
         print("You have {} penalties".format(penalties))
     print(player)
-    cards.screen.blit(player.image, player.rect)
-    pygame.display.flip()
+    updatedareas += [cards.screen.blit(player.image, player.rect)]
+    pygame.display.update(updatedareas)
+    updatedareas = []
 
 
 def checkmoves(card, moves):
@@ -262,18 +269,21 @@ def reversal(ishum, player): #input True if hum and false if AI, and the player 
     else:
         count = aiplayers.index(player)
 
+updatedareas = []
 deal(numhumans, numais, cardsinitial) #start the game by dealing
 topcard = deck.deal_card()    #draw a card from the deck
 turnnum = 0 #count the number of turns
-cards.screen.fill(bg)
-cards.screen.blit(deck.image, deck.rect)
-pygame.display.flip()
+updatedareas += [cards.screen.blit(deck.image, deck.rect)]
+pygame.display.update(updatedareas)
+updatedareas = []
 
 def cut(player, cardimage):
     """Move card from deck to player's hand"""
+    global updatedareas
     cardrect = deck.rect.copy()
     goal = (player.rect.x+player.posempty[0], player.rect.y+player.posempty[1])
-    pygame.display.flip()
+    pygame.display.update(updatedareas)
+    updatedareas = []
     speed = [(goal[0]-cardrect.x), (goal[1]-cardrect.y)]
     speed = [speed[0]/math.sqrt(math.pow(speed[0],2)+math.pow(speed[1],2))*20, speed[1]/math.sqrt(math.pow(speed[0],2)+math.pow(speed[1],2))*20]
     eraser = pygame.Surface((cards.CARDW, cards.CARDH))
@@ -281,10 +291,12 @@ def cut(player, cardimage):
     prevdisty = abs(cardrect.y - goal[1])
     prevdistx = abs(cardrect.x - goal[0])
     while(prevdisty >= abs(cardrect.y - goal[1]) and prevdistx >= abs(cardrect.x - goal[0])):
+        clock.tick(90)
         eraser.blit(cards.screen, (0, 0), (cardrect.x, cardrect.y, cards.CARDW, cards.CARDH))
-        cards.screen.blit(cardimage, cardrect)
-        pygame.display.flip()
-        cards.screen.blit(eraser, cardrect)
+        updatedareas += [cards.screen.blit(cardimage, cardrect)]
+        pygame.display.update(updatedareas)
+        updatedareas = []
+        updatedareas += [cards.screen.blit(eraser, cardrect)]
         prevdisty = abs(cardrect.y - goal[1])
         prevdistx = abs(cardrect.x - goal[0])
         cardrect = cardrect.move(speed)
@@ -314,7 +326,7 @@ while play:
     while count < len(aiplayers):
         eraser = pygame.Surface((cards.width, cards.CARDH))
         eraser.fill(bg)
-        cards.screen.blit(eraser, handpos) 
+        updatedareas += [cards.screen.blit(eraser, handpos)]
         if aiinplay[count][0]:
             print("AI Player {}".format(count+1))
             checkturn(aiplayers[count], aiplayers[count].turn(topcard, prevmovefeat, prevmovelab))
