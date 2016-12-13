@@ -12,6 +12,7 @@ CARDW = 73
 HANDW = 1800
 size = width, height = 1890, 1080
 screen = pygame.display.set_mode(size)
+pygame.display.set_caption("Mao Card Game")
 cards = pygame.image.load("card_images.png").convert() #load image of cards
 cardback = pygame.image.load("card_back.png").convert()
 
