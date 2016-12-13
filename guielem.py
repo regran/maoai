@@ -9,7 +9,7 @@ def wrapline(font, words, rect):
     words = words.split()
     lines = []
     while words != []:
-        finalwords = words[0] + " "
+        finalwords = " " + words[0] + " "
         del words[0]
         while words!= [] and (fnt.size(finalwords + words[0])[0]< rect.width):
             print(rect.width)
@@ -28,7 +28,7 @@ class Button(pygame.sprite.Sprite):
         self.lin = (150, 150, 150)
         self.inf = (210, 210, 210)
         self.image.fill(self.inf)
-        self.image.blit(fnt.render(self.words[0], True, (0, 0, 0)), (2,2))
+        self.image.blit(fnt.render(self.words[0], True, (0, 0, 0)), (0,0))
 
     def drawB(self, surf):
         """Draw the button on a given surface"""
@@ -80,7 +80,7 @@ while(draw):
         if event.type == pygame.QUIT:
             draw = False
     screen.fill((0, 255, 0))
-    prompttest = TwoButtonPrompt("A B C D E F G H I J K L M N O P Q R S T", 10, 10, 200, 100, "Yes", "No")
+    prompttest = TwoButtonPrompt("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z I love writing GUIS that's a lie", 10, 10, 200, 100, "Yes", "No")
     prompttest.drawP(screen)
     butt = Button("Testing", 250, 250, 100, 50)
     butt.drawB(screen)
