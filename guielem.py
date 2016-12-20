@@ -4,6 +4,8 @@ pygame.init()
 fnt = pygame.font.SysFont('texgyreheros', 15)
 print(pygame.font.get_fonts())
 
+buttons = []
+
 def wrapline(font, words, rect):
     """Return words of a font formatted to fit in a given rect"""
     words = words.split()
@@ -12,8 +14,6 @@ def wrapline(font, words, rect):
         finalwords = " " + words[0] + " "
         del words[0]
         while words!= [] and (fnt.size(finalwords + words[0])[0]< rect.width):
-            print(rect.width)
-            print(finalwords)
             finalwords += words[0] + " "
             del words[0]
         lines+=[finalwords]
@@ -25,15 +25,32 @@ class Button(pygame.sprite.Sprite):
         self.image = pygame.Surface((wid, hei))
         self.rect = self.image.get_rect(x=xcoord, y=ycoord)
         self.words = wrapline(fnt, word, self.rect) 
-        self.lin = (150, 150, 150)
+        self.lin = (185, 185, 185)
         self.inf = (210, 210, 210)
-        self.image.fill(self.inf)
-        self.image.blit(fnt.render(self.words[0], True, (0, 0, 0)), (0,0))
 
     def drawB(self, surf):
         """Draw the button on a given surface"""
+        self.image.fill(self.inf)
+        self.image.blit(fnt.render(self.words[0], True, (0, 0, 0)), (0,0))
         surf.blit(self.image, self.rect)
         pygame.draw.rect(surf, self.lin, self.rect, 2)
+
+   # def is_clicked(self, clickorhov):
+    def is_clicked(self):
+        click = pygame.mouse.get_pressed()[0] 
+        pos = self.rect.collidepoint(pygame.mouse.get_pos())
+        #if clickorhov:
+        if click and pos: #mouse is clicked
+            self.inf = (175, 175, 175)
+        elif pos: #mouseover
+            self.inf = (220, 220, 220)
+        elif not (click or pos): #mouse released and not hovering
+            self.inf = (210,210,210)
+        return pos and self.inf == (175, 175, 175)  #mouse released on button
+
+    def click(self):
+        self.inf = (210, 210, 210)
+
 
 class Prompt():
     def __init__(self, promp, xcoord, ycoord, w, h):
@@ -55,34 +72,69 @@ class Prompt():
 
 class ButtonPrompt(Prompt):
     def __init__(self, promp, x, y, w, h, butt):
+        global buttons
         super(ButtonPrompt, self).__init__(promp, x, y, w, h)
-        self.b = Button(butt, w-w/5-10, h-(h/5)-10, w/5, h/5)
-        self.b.drawB(self.image)
+        self.b = Button(butt, x+w-w/5-10, y+h-(h/5)-10, w/5, h/5)
 
     def drawP(self, surf):
         super(ButtonPrompt, self).drawP(surf)
+        self.b.drawB(surf)
+        return self.b.is_clicked()
 
 class TwoButtonPrompt(ButtonPrompt):
     def __init__(self, promp, x, y, w, h, butt1, butt2):
+        global buttons
         super(TwoButtonPrompt, self).__init__(promp, x, y, w, h, butt2)
-        self.b2 = Button(butt1, 10, h-(h/5)-10, w/5, h/5)
-        self.b2.drawB(self.image)
-    
+        self.b2 = Button(butt1, x+10, y+h-(h/5)-10, w/5, h/5)
+
     def drawP(self, surf):
-        super(TwoButtonPrompt, self).drawP(surf)
+        b1 = super(TwoButtonPrompt, self).drawP(surf)
+        self.b2.drawB(surf)
+        return self.b2.is_clicked() or b1      
+        
+        
 
 screen = pygame.display.set_mode([500,500])
 pygame.display.set_caption("Drawing test")
 draw = True
 
+prompttest = TwoButtonPrompt("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z I love writing GUIS that's a lie", 10, 10, 200, 100, "Yes", "No")
+butt = Button("Testing", 250, 250, 100, 50)
+buttons+=[butt]
+print(len(buttons))
+clicked = []
 while(draw):
+    hover = []
+    unclick = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             draw = False
+            break
+        """pos = pygame.mouse.get_pos()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            clicked = [b for b in buttons if b.rect.collidepoint(pos)]
+            if len(clicked) > 0:
+                print ("A button was clicked")
+        if event.type == pygame.MOUSEBUTTONUP:
+            unclick = True
+            print("Unclick time")"""
     screen.fill((0, 255, 0))
-    prompttest = TwoButtonPrompt("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z I love writing GUIS that's a lie", 10, 10, 200, 100, "Yes", "No")
-    prompttest.drawP(screen)
-    butt = Button("Testing", 250, 250, 100, 50)
+    """for b in buttons:
+        if b.rect.collidepoint(pos):
+            b.is_clicked(False)
+        else:
+            if not b in clicked:
+                b.unclick()
+    for b in clicked:
+        b.is_clicked(True)
+    if unclick:
+        for c in clicked:
+            b.unclick()
+        clicked = []"""
+    for b in buttons:
+        b.is_clicked()
+    print(prompttest.drawP(screen))
+    
     butt.drawB(screen)
     pygame.display.flip()
 
