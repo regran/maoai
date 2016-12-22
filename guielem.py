@@ -5,6 +5,7 @@ fnt = pygame.font.SysFont('texgyreheros', 15)
 print(pygame.font.get_fonts())
 
 buttons = []
+events = []
 
 def wrapline(font, words, rect):
     """Return words of a font formatted to fit in a given rect"""
@@ -39,7 +40,6 @@ class Button(pygame.sprite.Sprite):
     def is_clicked(self, up=True):
         click = pygame.mouse.get_pressed()[0] 
         pos = self.rect.collidepoint(pygame.mouse.get_pos())
-        #if clickorhov:
         newclick = pos and self.inf == (175,175,175) and not click
         if pos and not up: #button pressed down
             self.inf = (175, 175, 175)
@@ -80,7 +80,13 @@ class ButtonPrompt(Prompt):
     def drawP(self, surf):
         super(ButtonPrompt, self).drawP(surf)
         self.b.drawB(surf)
-        #return self.b.is_clicked()
+        b1 = False
+        for e in events:
+            b1 = mousecheck(event, [self.b])
+            if b1:
+                break
+        return b1    
+
 
 class TwoButtonPrompt(ButtonPrompt):
     def __init__(self, promp, x, y, w, h, butt1, butt2):
@@ -91,9 +97,23 @@ class TwoButtonPrompt(ButtonPrompt):
     def drawP(self, surf):
         b1 = super(TwoButtonPrompt, self).drawP(surf)
         self.b2.drawB(surf)
-       # return self.b2.is_clicked() or b1      
+        b2 = False
+        if b1:
+            return b1, False
+        for e in events:
+            b2=mousecheck(event, [self.b2])
+            if b2:
+                break
+        return b1, b2    
         
-        
+def mousecheck(event, buttons):
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        for c in buttons:
+            return  c.is_clicked(False)
+    else:
+        for c in buttons:
+            return c.is_clicked() 
+
 
 screen = pygame.display.set_mode([500,500])
 pygame.display.set_caption("Drawing test")
@@ -110,44 +130,15 @@ while(draw):
     pos = pygame.mouse.get_pos()
     clicked = [b for b in buttons if b.rect.collidepoint(pos)]  
     mousevent = False
-    for event in pygame.event.get():
+    events = pygame.event.get()
+    for event in events:
         if event.type == pygame.QUIT:
             draw = False
             break
-        if event.type == pygame.MOUSEBUTTONUP:
-            for c in clicked:
-                print(c.is_clicked(True))
-            mousevent = True
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            for c in clicked:
-                c.is_clicked(False)
-            mousevent = True
-        """if event.type == pygame.MOUSEBUTTONDOWN:
-            clicked = [b for b in buttons if b.rect.collidepoint(pos)]
-            if len(clicked) > 0:
-                print ("A button was clicked")
-        if event.type == pygame.MOUSEBUTTONUP:
-            unclick = True
-            print("Unclick time")"""
+        mousecheck(event, clicked)
     screen.fill((0, 255, 0))
-    """for b in buttons:
-        if b.rect.collidepoint(pos):
-            b.is_clicked(False)
-        else:
-            if not b in clicked:
-                b.unclick()
-    for b in clicked:
-        b.is_clicked(True)
-    if unclick:
-        for c in clicked:
-            b.unclick()
-        clicked = []"""
-    if not mousevent:
-        for b in buttons:
-            if(b.is_clicked()):
-                exit()
-    prompttest.drawP(screen)
-    
+    if(prompttest.drawP(screen)[0]):
+        exit()
     butt.drawB(screen)
     pygame.display.flip()
 
