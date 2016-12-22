@@ -36,17 +36,18 @@ class Button(pygame.sprite.Sprite):
         pygame.draw.rect(surf, self.lin, self.rect, 2)
 
    # def is_clicked(self, clickorhov):
-    def is_clicked(self):
+    def is_clicked(self, up=True):
         click = pygame.mouse.get_pressed()[0] 
         pos = self.rect.collidepoint(pygame.mouse.get_pos())
         #if clickorhov:
-        if click and pos: #mouse is clicked
+        newclick = pos and self.inf == (175,175,175) and not click
+        if pos and not up: #button pressed down
             self.inf = (175, 175, 175)
-        elif pos: #mouseover
+        elif pos and not click: #mouseover
             self.inf = (220, 220, 220)
-        elif not (click or pos): #mouse released and not hovering
+        elif (pos and not up) or not (click or pos): #mouse released and not hovering
             self.inf = (210,210,210)
-        return pos and self.inf == (175, 175, 175)  #mouse released on button
+        return newclick  #mouse released on pressed button
 
     def click(self):
         self.inf = (210, 210, 210)
@@ -79,7 +80,7 @@ class ButtonPrompt(Prompt):
     def drawP(self, surf):
         super(ButtonPrompt, self).drawP(surf)
         self.b.drawB(surf)
-        return self.b.is_clicked()
+        #return self.b.is_clicked()
 
 class TwoButtonPrompt(ButtonPrompt):
     def __init__(self, promp, x, y, w, h, butt1, butt2):
@@ -90,7 +91,7 @@ class TwoButtonPrompt(ButtonPrompt):
     def drawP(self, surf):
         b1 = super(TwoButtonPrompt, self).drawP(surf)
         self.b2.drawB(surf)
-        return self.b2.is_clicked() or b1      
+       # return self.b2.is_clicked() or b1      
         
         
 
@@ -106,12 +107,22 @@ clicked = []
 while(draw):
     hover = []
     unclick = False
+    pos = pygame.mouse.get_pos()
+    clicked = [b for b in buttons if b.rect.collidepoint(pos)]  
+    mousevent = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             draw = False
             break
-        """pos = pygame.mouse.get_pos()
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONUP:
+            for c in clicked:
+                print(c.is_clicked(True))
+            mousevent = True
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            for c in clicked:
+                c.is_clicked(False)
+            mousevent = True
+        """if event.type == pygame.MOUSEBUTTONDOWN:
             clicked = [b for b in buttons if b.rect.collidepoint(pos)]
             if len(clicked) > 0:
                 print ("A button was clicked")
@@ -131,9 +142,11 @@ while(draw):
         for c in clicked:
             b.unclick()
         clicked = []"""
-    for b in buttons:
-        b.is_clicked()
-    print(prompttest.drawP(screen))
+    if not mousevent:
+        for b in buttons:
+            if(b.is_clicked()):
+                exit()
+    prompttest.drawP(screen)
     
     butt.drawB(screen)
     pygame.display.flip()
