@@ -1,11 +1,8 @@
 import pygame
 pygame.init()
 
-fnt = pygame.font.SysFont('texgyreheros', 15)
-print(pygame.font.get_fonts())
+fnt = pygame.font.SysFont('texgyreheros', 30)
 
-buttons = []
-events = []
 
 def wrapline(font, words, rect):
     """Return words of a font formatted to fit in a given rect"""
@@ -56,7 +53,7 @@ class Button(pygame.sprite.Sprite):
 class Prompt():
     def __init__(self, promp, xcoord, ycoord, w, h):
         self.image = pygame.Surface((w,h))
-        self.rect = self.image.get_rect(x=xcoord, y=ycoord)
+        self.rect = self.image.get_rect(x=xcoord-w/2, y=ycoord-h/2)
         self.inf = (200, 200, 200)
         self.lin = (160, 160, 160)
         self.p = wrapline(fnt, promp, self.rect)
@@ -68,21 +65,21 @@ class Prompt():
             lh+=lineheight
 
     def drawP(self, surf):
-        pygame.draw.rect(screen, self.lin, self.rect, 2)
+        pygame.draw.rect(surf, self.lin, self.rect, 2)
         surf.blit(self.image, self.rect)
 
 class ButtonPrompt(Prompt):
     def __init__(self, promp, x, y, w, h, butt):
         global buttons
         super(ButtonPrompt, self).__init__(promp, x, y, w, h)
-        self.b = Button(butt, x+w-w/5-10, y+h-(h/5)-10, w/5, h/5)
+        self.b = Button(butt, x+w*4/5-10-w/2, y+h*4/5-10-h/2, w/5, h/5)
 
-    def drawP(self, surf):
+    def drawP(self, surf, events):
         super(ButtonPrompt, self).drawP(surf)
         self.b.drawB(surf)
         b1 = False
         for e in events:
-            b1 = mousecheck(event, [self.b])
+            b1 = mousecheck(e, [self.b])
             if b1:
                 break
         return b1    
@@ -92,16 +89,16 @@ class TwoButtonPrompt(ButtonPrompt):
     def __init__(self, promp, x, y, w, h, butt1, butt2):
         global buttons
         super(TwoButtonPrompt, self).__init__(promp, x, y, w, h, butt2)
-        self.b2 = Button(butt1, x+10, y+h-(h/5)-10, w/5, h/5)
+        self.b2 = Button(butt1, x+10-w/2, y+h-(h/5)-10-h/2, w/5, h/5)
 
-    def drawP(self, surf):
-        b1 = super(TwoButtonPrompt, self).drawP(surf)
+    def drawP(self, surf, events):
+        b1 = super(TwoButtonPrompt, self).drawP(surf, events)
         self.b2.drawB(surf)
         b2 = False
         if b1:
             return b1, False
         for e in events:
-            b2=mousecheck(event, [self.b2])
+            b2=mousecheck(e, [self.b2])
             if b2:
                 break
         return b1, b2    
@@ -113,23 +110,24 @@ def mousecheck(event, buttons):
     else:
         for c in buttons:
             return c.is_clicked() 
+"""
+print(pygame.font.get_fonts())
 
+buttons = []
+events = []
 
-screen = pygame.display.set_mode([500,500])
+screen = pygame.display.set_mode([1000,800])
 pygame.display.set_caption("Drawing test")
 draw = True
 
-prompttest = TwoButtonPrompt("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z I love writing GUIS that's a lie", 10, 10, 200, 100, "Yes", "No")
+prompttest = ButtonPrompt("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z I love writing GUIS that's a lie", 10, 10, 500, 250,  "No")
 butt = Button("Testing", 250, 250, 100, 50)
 buttons+=[butt]
 print(len(buttons))
 clicked = []
 while(draw):
-    hover = []
-    unclick = False
     pos = pygame.mouse.get_pos()
     clicked = [b for b in buttons if b.rect.collidepoint(pos)]  
-    mousevent = False
     events = pygame.event.get()
     for event in events:
         if event.type == pygame.QUIT:
@@ -137,9 +135,10 @@ while(draw):
             break
         mousecheck(event, clicked)
     screen.fill((0, 255, 0))
-    if(prompttest.drawP(screen)[0]):
+    if prompttest.drawP(screen, events):
         exit()
     butt.drawB(screen)
     pygame.display.flip()
 
 pygame.quit()
+"""

@@ -2,8 +2,10 @@
 import cards
 import AI
 import pygame
-import pygame.freetype
 import math
+import time
+import pygame.freetype
+import eztext, guielem
 pygame.init()
 
 red = 255, 0, 0
@@ -13,21 +15,80 @@ black = 0, 0, 0
 white = 0, 0, 0
 bg = 14, 144, 14 #background color
 play = True
+updatedareas = []
+pfont = pygame.font.SysFont('opensans', 50)
+font = pygame.freetype.SysFont('opensans', 50)
+
+def eprompt(p):
+    global updatedareas
+    eraser = pygame.Surface((p.rect.width, p.rect.height))
+    eraser.blit(cards.screen, p.image.get_rect())
+    draw = False
+    while(not draw):
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                draw = True
+                play = False
+                exit()
+        draw = p.drawP(cards.screen,events)
+        updatedareas += [p.rect]
+        pygame.display.update(updatedareas)
+        updatedareas = []
+    updatedareas += [cards.screen.blit(eraser, p.rect)]
+    pygame.display.update(updatedareas)
+    updatedareas = []
+   
+
+def gettext(textlist, rect, numonly):
+    global updatedareas
+    if numonly:
+        rest='01234567890'
+    else: rest='\'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\\\'()*+,-./:;<=>?@[\]^_`{|}~\''
+    words = True
+    lineheight = pfont.size(textlist[0])[1]
+    lh = rect.y
+    eraser = pygame.Surface((rect.width, lineheight))
+    eraser.fill(bg)
+    inps=[]
+    for text in textlist:
+        txtbx = eztext.Input(x=rect.x, y=lh, maxlength=rect.width, color=black, restricted=rest,font=pfont, prompt=text)  
+        val = None
+        while val == None:
+            clock.tick(30)
+            print("i'm trying my best")
+            events = pygame.event.get()
+            for e in events:
+                if e.type == pygame.QUIT:
+                    play = False
+                    return
+            val = txtbx.update(events)
+            cards.screen.blit(eraser, (txtbx.x, txtbx.y))
+            txtbx.draw(cards.screen)
+            updatedareas += [eraser.get_rect(x=txtbx.x, y=txtbx.y)]
+            pygame.display.update(updatedareas)
+            updatedareas = []
+        inps += [val]    
+        lh += lineheight 
+    return inps
 
 
 cards.screen.fill(bg)
 pygame.display.update()
 clock = pygame.time.Clock()
-try:
+numhumans, numais, numperf = map(lambda x: int(x), gettext(["Enter number of human players: ", "Enter number of new AI players: ", "Enter number of perfect AIs: "], cards.screen.get_rect(x=cards.width/5, y=cards.height/5), True))
+
+
+"""try:
     numhumans = int(input("Enter number of human players: "))
     numais = int(input("Enter number of new AI players: "))
     numperf = int(input("Enter number of perfect AIs: "))
 except ValueError:
     print("A number was expected.")
     play = False
-    exit()
-if numhumans < 0 or numais < 0 or numperf < 0 or (numhumans + numais + numperf < 2):
-    print("That isn't a valid number of players.")
+    exit()"""
+if numhumans + numais + numperf < 2:
+    eprompt(guielem.ButtonPrompt("That isn't a valid number of players. Think about what a sad and lonely person you are. ", cards.width/2, cards.height/2, cards.width/3, cards.height/5, "Exit"))
     play = False
     exit()
 
@@ -35,7 +96,7 @@ if numhumans < 0 or numais < 0 or numperf < 0 or (numhumans + numais + numperf <
 rankrules = {'5': "highfive", 'K':"bow", 'Q': "bow", '7':'nice'}
 suitrules = {'H': "ily", 'S':"rave", 'D':'sparkly'}
 
-inp = input("Would you like a custom set of rules? (Y/N) If no, a default will be used.").lower()
+inp = input("Would you like a custom set of rules? (Y/N) If no, a default will be used. ").lower()
 if inp == "y":
     rankrules = {}
     suitrules = {}
@@ -58,7 +119,7 @@ if inp == "y":
         elif inp[0] in cards.RANKS:
             rankrules.update({inp[0]:inp[1]})
         else:
-            print("That is not a valid suit or rank. Note that entry is case sensitive.  Please try again or say \"Start\"")
+            print("That is not a valid suit or rank. Note that entry is case sensitive. Please try again or say \"Start\"")
             continue 
 elif not inp=='n':
     print("Y/N was expected.")
@@ -77,7 +138,7 @@ spare_deck = None
 deck = None
 deckpos = (cards.width/2-cards.CARDW/2-50, cards.height/2-cards.CARDH/2)
 handpos = (100, 900) 
-font = pygame.freetype.SysFont('opensans', 50)
+
 
 def deal(numhum, numai, cardsphand): #The parameters are number human players, number of ai players
     """Initiate a game, asking how many players there are and dealing cards"""
@@ -107,6 +168,30 @@ def deal(numhum, numai, cardsphand): #The parameters are number human players, n
                 deck.deck += cards.Deck().deck
             ai.hand.add_card(deck.deal_card())
 
+def playerstatus(player=None):
+    """Display number of cards held by other players at top"""
+    global updatedareas
+    i = 0
+    for ai in aiplayers:
+        ai.hand.rect.x = handpos[0] + i*(cards.CARDW+50)
+        ai.hand.rect.y = 100
+        updatedareas += [cards.screen.blit(cards.cardback, ai.hand.rect)]
+        font.render_to(cards.screen, (handpos[0]+20+i*(cards.CARDW+50), 105), str(len(ai.hand.cards)), fgcolor=black)
+        i += 1
+    for hum in hums:
+        if hum == player:
+            continue
+        updatedareas += [cards.screen.blit(cards.cardback, (handpos[0]+i*(cards.CARDW+50), 100))]
+        font.render_to(cards.screen, (handpos[0]+20+i*(cards.CARDW+50), 105), str(len(hum.cards)), fgcolor=black)
+        i += 1
+    eraser = pygame.Surface((cards.width, cards.CARDH))
+    eraser.fill(bg)
+    updatedareas += [cards.screen.blit(eraser, (handpos[0]+i*(cards.CARDW+50), 100))]
+    pygame.display.update(updatedareas)
+    updatedareas = []
+    
+
+
 def turn(player): #input whose turn it is
     """Get input from player about move and process the player's decision based on game rules"""
     global topcard, play, updatedareas
@@ -117,22 +202,7 @@ def turn(player): #input whose turn it is
     digit = False
     print(player)
     updatedareas += [cards.screen.blit(player.image, player.rect)]
-    i = 0
-    for hum in hums:
-        if hum == player:
-            continue
-        updatedareas += [cards.screen.blit(cards.cardback, (handpos[0]+i*(cards.CARDW+50), 100))]
-        font.render_to(cards.screen, (handpos[0]+20+i*(cards.CARDW+50), 105), str(len(hum.cards)), fgcolor=black)
-        i += 1
-    for ai in aiplayers:
-        ai.hand.rect.x = handpos[0] + i*(cards.CARDW+50)
-        ai.hand.rect.y = 100
-        updatedareas += [cards.screen.blit(cards.cardback, ai.hand.rect)]
-        font.render_to(cards.screen, (handpos[0]+20+i*(cards.CARDW+50), 105), str(len(ai.hand.cards)), fgcolor=black)
-        i += 1
-
-    pygame.display.update(updatedareas)
-    updatedareas = []
+    playerstatus(player)
     while not digit:
         move = input("Which card will you play? ")
         #player inputs index of card to play and a list of string commands
@@ -254,7 +324,8 @@ def penalty(who, oops): #input hand and number of penalties
             c.flip()
         cut(who, c.image)
         if who.rect.y == 100:
-            c.flip () #so AI will play card flipped correctly
+            playerstatus()
+            c.flip() #so AI will play card flipped correctly
         who.add_card(c)
 
 def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is
@@ -269,7 +340,6 @@ def reversal(ishum, player): #input True if hum and false if AI, and the player 
     else:
         count = aiplayers.index(player)
 
-updatedareas = []
 deal(numhumans, numais, cardsinitial) #start the game by dealing
 topcard = deck.deal_card()    #draw a card from the deck
 turnnum = 0 #count the number of turns
@@ -291,6 +361,7 @@ def cut(player, cardimage):
     prevdisty = abs(cardrect.y - goal[1])
     prevdistx = abs(cardrect.x - goal[0])
     while(prevdisty >= abs(cardrect.y - goal[1]) and prevdistx >= abs(cardrect.x - goal[0])):
+        pygame.event.pump()
         clock.tick(90)
         eraser.blit(cards.screen, (0, 0), (cardrect.x, cardrect.y, cards.CARDW, cards.CARDH))
         updatedareas += [cards.screen.blit(cardimage, cardrect)]
@@ -329,13 +400,16 @@ while play:
         updatedareas += [cards.screen.blit(eraser, handpos)]
         if aiinplay[count][0]:
             print("AI Player {}".format(count+1))
+            playerstatus()
             checkturn(aiplayers[count], aiplayers[count].turn(topcard, prevmovefeat, prevmovelab))
+            updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))]
             print(aiplayers[count].hand)
             print()
             if aiplayers[count].hand.isempty():
                 print("GG EZ")
                 play = False
                 break
+            time.sleep(1) #pause between turns
         else:
             aiinplay[count] = (False, aiinplay[count][1]-1)
             if aiinplay[count][1] == 0:
