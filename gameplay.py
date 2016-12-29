@@ -32,7 +32,9 @@ def quit():
             pygame.quit()
             exit()
 
-threading.Thread(target=quit).start()
+t=threading.Thread(target=quit)
+t.setDaemon(True)
+t.start()
 
 def eprompt(p):
     global updatedareas
@@ -321,7 +323,7 @@ def checkmoves(card, moves):
 
 def checkturn(ai, moves):
     """Respond appropriately to the AI's actions based on game's rules"""
-    global topcard
+    global topcard, updatedareas
     top, actions = moves
     penalties = 0
     if top == topcard: #The AI returned the topcard if it has no valid moves
@@ -329,6 +331,10 @@ def checkturn(ai, moves):
         print("There was no valid card")
     else: #play a valid card
         prevmovefeat.append([top.suit, top.rank]) #store data about card features
+        cut(ai.hand, topcard.image, -1)
+        updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))]
+        pygame.display.update(updatedareas)
+        updatedareas = []
         penalties += checkmoves(top, actions)
         spare_deck.add_card(topcard)
     topcard = top
@@ -361,9 +367,9 @@ def penalty(who, oops): #input hand and number of penalties
             c.flip()
         cut(who, c.image)
         if who.rect.y == 100:
-            playerstatus()
             c.flip() #so AI will play card flipped correctly
         who.add_card(c)
+        playerstatus(who)
 
 def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is
     """Reverse the order of play at current player"""
@@ -384,11 +390,17 @@ updatedareas += [cards.screen.blit(deck.image, deck.rect)]
 pygame.display.update(updatedareas)
 updatedareas = []
 
-def cut(player, cardimage):
+def cut(player, cardimage, mult=1):
     """Move card from deck to player's hand"""
     global updatedareas
-    cardrect = deck.rect.copy()
-    goal = (player.rect.x+player.posempty[0], player.rect.y+player.posempty[1])
+    if mult == 1:
+        cardrect = deck.rect.copy()
+        goal = (player.rect.x+player.posempty[0], player.rect.y+player.posempty[1])
+    else:
+        goal = (deckpos[0]+100, deckpos[1])
+        cardrect = player.rect.copy()
+        cardrect.x += player.posempty[0]
+        cardrect.y += player.posempty[1]
     pygame.display.update(updatedareas)
     updatedareas = []
     speed = [(goal[0]-cardrect.x), (goal[1]-cardrect.y)]

@@ -52,7 +52,6 @@ class Card(pygame.sprite.Sprite):
         click = pygame.mouse.get_pressed()[0] 
         pos = self.rect.collidepoint(pygame.mouse.get_pos())
         newclick = pos and self.clicked and not click
-        print(self.rect)
         if pos and not up: #button pressed down
             pygame.draw.rect(screen, (227, 193, 13), hovrect, 3)
             updates += [hovrect]
