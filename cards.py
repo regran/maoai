@@ -122,9 +122,12 @@ class Hand():
 
     def rem_card(self, card):
         """Remove a card from the hand"""
-        self.image.blit(self.image, ((self.cards.index(card))*CARDW*6/5, 0), 
-                       ((self.cards.index(card)+1)*CARDW*6/5, 0, HANDW - (self.cards.index(card)+2)*CARDW*6/5, CARDH))
-        if self.cards.index(card) == len(self.cards)-1:
+        i = self.cards.index(card)
+        self.image.blit(self.image, (i*CARDW*6/5, 0), 
+                       ((i+1)*CARDW*6/5, 0, HANDW - (i+2)*CARDW*6/5, CARDH))
+        for l in self.cards[i:]:
+            l.rect.x = l.rect.x-CARDW*6/5
+        if i == len(self.cards)-1:
             self.image.blit(self.cards[self.numcard-2].image, ((self.numcard-2)*CARDW*6/5, 0))
         self.cards.remove(card)
         self.numcard += -1

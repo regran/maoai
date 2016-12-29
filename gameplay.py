@@ -154,21 +154,26 @@ deckpos = (cards.width/2-cards.CARDW/2-50, cards.height/2-cards.CARDH/2)
 handpos = (100, 900) 
 
 lines = []
-prevrec = pygame.Rect(deckpos[0]+200, deckpos[1], cards.width-deckpos[0]-200, cards.height-deckpos[1])
+prevrec = pygame.Rect(cards.width*3/5, 100+cards.CARDH, cards.width*2/5, handpos[1]-100-cards.CARDH)
 def previously(newtext):
-    global lines
+    global lines, updatedareas
     lines += guielem.wrapline(smallfont, newtext, prevrec)
+    print(lines)
     lh = 0
     lineheight = smallfont.get_sized_glyph_height()
-    eraser = Surface((prevrec.width, prevrec.height))
-    updatedareas += cards.screen.blit(eraser, prevrec)
-    pygame.display.update(updatedareas)
-    updatedareas = []
+    eraser = pygame.Surface((prevrec.width, prevrec.height))
+    eraser.fill(bg)
+    updatedareas += [cards.screen.blit(eraser, prevrec)]
     while len(lines)*lineheight>prevrec.height:
         lines = lines[1:]
     for l in lines:
+        print(l)
+        print(prevrec.x, prevrec.y+lh)
         smallfont.render_to(cards.screen, (prevrec.x, prevrec.y + lh), l, fgcolor=black)
         lh += lineheight
+    pygame.display.update(updatedareas)
+    updatedareas = []
+
 
 def deal(numhum, numai, cardsphand): #The parameters are number human players, number of ai players
     """Initiate a game, asking how many players there are and dealing cards"""
@@ -248,8 +253,9 @@ def turn(player): #input whose turn it is
     digit = False
     updatedareas += [cards.screen.blit(player.image, player.rect)] #HANDYHAND
     playerstatus(player)
+    print(player)
     card = cardselect(player)
-    [move] = gettext(["Special actions: "], pygame.Rect(handpos[0], (deckpos[1]+handpos[1])/2, cards.width-handpos[0]*2, deckpos[1]-handpos[1]))
+    [move] = gettext(["Special actions: "], pygame.Rect(handpos[0], (deckpos[1]+handpos[1])/2, cards.width-prevrec.width-handpos[0], deckpos[1]-handpos[1]))
     if move == "gg ez":        #im allowed to have fun in my code
         cards.screen.fill(bg)
         jokefont.render_to(cards.screen, (cards.width/2, cards.height/2), "wow", fgcolor=red)
@@ -263,9 +269,10 @@ def turn(player): #input whose turn it is
     if topcard.suit != s and topcard.rank != r: #check if valid card played
         validturn = False
         penalties += 1
-        print("That isn't a valid card")
+        previously("Invalid card")
     else: #check if special rules were followed
         prevmovefeat.append([s, r]) #store data about card move features
+        previously("Actions: {}".format(move))
         penalties += checkmoves(card, move)
     if validturn:
         spare_deck.add_card(topcard)
@@ -273,10 +280,10 @@ def turn(player): #input whose turn it is
         player.rem_card(card)
     penalty(player, penalties)
     if penalties == 1:
-        print("You have 1 penalty")
+        previously("1 penalty")
     else:
-        print("You have {} penalties".format(penalties))
-    print(player)
+        previously("{} penalties".format(penalties))
+
 
 
 
@@ -291,20 +298,16 @@ def checkmoves(card, moves):
         if r == i:
             if not(rankrules[i] in moves):
                 pen += 1
-                print("A special rank action was missed")
             else:
                 del moves[moves.index(rankrules[i])]
     for i in list(suitrules.keys()):
         if s == i:
             if not(suitrules[i] in moves):
                 pen += 1
-                print("A special suit action was missed")
             else:
                 del moves[moves.index(suitrules[i])]
     for i in moves:
         pen += 1
-        print("Unnecessary action(s)")
-#   prevmovelab[-1].append(str(pen))#store data about how many penalties this move
     if pen > 0:
         del prevmovelab[-1]
         del prevmovefeat[-1]
@@ -317,8 +320,10 @@ def checkturn(ai, moves):
     penalties = 0
     if top == topcard: #The AI returned the topcard if it has no valid moves
         penalties += 1 #It is penalized if it has no valid card
-        print("There was no valid card")
+        previously("Had no valid card")
     else: #play a valid card
+        previously("Played {}".format(top))
+        previously("Actions: {}".format(actions))
         prevmovefeat.append([top.suit, top.rank]) #store data about card features
         cut(ai.hand, topcard.image, -1)
         updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))]
@@ -328,9 +333,9 @@ def checkturn(ai, moves):
     topcard = top
     penalty(ai.hand, penalties)
     if penalties == 1:
-        print("You have 1 penalty")
+        previously("1 penalty")
     else:
-        print("You have {} penalties".format(penalties))
+        previously("{} penalties".format(penalties))
 
 def skip(ishum, howlong):
     """control who is skipped for how long"""
@@ -411,21 +416,20 @@ def cut(player, cardimage, mult=1):
 
 eraser = pygame.Surface((cards.width, cards.CARDH+15))
 eraser.fill(bg)
-
+previously("GLHF")
 while play:
     turnnum += 1
     count = 0
     while count < len(hums): #go through the human players and have them go
         if huminplay[count][0]: #skip if not in play
-            print("Human Player {}".format(count+1))
+            previously("Human Player {}".format(count+1))
             turn(hums[count])
             updatedareas += [cards.screen.blit(eraser, (handpos[0], handpos[1]-15))]
             cards.screen.blit(hums[count].image, hums[count].rect) #HANDYHAND
             pygame.display.update(updatedareas)
             updatedareas = []
-            print()
             if hums[count].isempty():
-                print("We have a winner!")
+                eprompt(guielem.ButtonPrompt("Congratulations! We have a winner!", cards.width/2, cards.height/2, cards.width/3, cards.height/5, "Yay!"))
                 play = False
             if not play:
                 break
@@ -442,14 +446,12 @@ while play:
     while count < len(aiplayers):
         updatedareas += [cards.screen.blit(eraser, (handpos[0], handpos[1]-15))]
         if aiinplay[count][0]:
-            print("AI Player {}".format(count+1))
+            previously("AI Player {}".format(count+1))
             playerstatus()
             checkturn(aiplayers[count], aiplayers[count].turn(topcard, prevmovefeat, prevmovelab))
             updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))]
-            print(aiplayers[count].hand)
-            print()
             if aiplayers[count].hand.isempty():
-                print("GG EZ")
+                eprompt(guielem.ButtonPrompt("AI Player {}: GG EZ".format(count+1), cards.width/2, cards.height/2, cards.width/3, cards.height/5, "gg"))
                 play = False
                 break
             time.sleep(1) #pause between turns
