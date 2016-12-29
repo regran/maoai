@@ -215,8 +215,9 @@ def playerstatus(player=None):
         updatedareas += [cards.screen.blit(cards.cardback, ai.hand.rect)]
         rec = font.get_rect(str(len(ai.hand.cards))) 
         if rec.width > cards.CARDW:
-            smallfont.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 105), None, fgcolor=black)
-        else: font.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 105), None, fgcolor=black)
+            rec=smallfont.get_rect(str(len(hum.cards)))
+            smallfont.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 100+cards.CARDH/2-rec.height/2), None, fgcolor=black)
+        else: font.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 100+cards.CARDH/2-rec.height/2), None, fgcolor=black)
         i += 1
     for hum in hums:
         if hum == player:
@@ -224,8 +225,9 @@ def playerstatus(player=None):
         updatedareas += [cards.screen.blit(cards.cardback, (handpos[0]+i*(cards.CARDW+50), 100))]
         rec = font.get_rect(str(len(hum.cards)))
         if rec.width>cards.CARDW:
-            smallfont.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 105), None, fgcolor=black)
-        else: font.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 105), None, fgcolor=black)
+            rec=smallfont.get_rect(str(len(hum.cards)))
+            smallfont.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 100+cards.CARDH/2-rec.height/2), None, fgcolor=black)
+        else: font.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 100+cards.CARDH/2-rec.height/2), None, fgcolor=black)
         i += 1
     eraser = pygame.Surface((cards.width, cards.CARDH))
     eraser.fill(bg)
@@ -260,6 +262,7 @@ def turn(player): #input whose turn it is
     updatedareas += [cards.screen.blit(player.image, player.rect)] #HANDYHAND
     playerstatus(player)
     print(player)
+    pygame.event.clear()
     card = cardselect(player)
     if card == deck or (topcard.suit != card.suit and topcard.rank != card.rank): #check if valid card played
         validturn = False
@@ -410,6 +413,7 @@ def cut(player, cardimage, mult=1):
     prevdistx = abs(cardrect.x - goal[0])
     while(prevdisty >= abs(cardrect.y - goal[1]) and prevdistx >= abs(cardrect.x - goal[0])):
         pygame.event.pump()
+        pygame.event.clear()
         clock.tick(90)
         eraser.blit(cards.screen, (0, 0), (cardrect.x, cardrect.y, cards.CARDW, cards.CARDH))
         updatedareas += [cards.screen.blit(cardimage, cardrect)]
