@@ -6,6 +6,7 @@ import math
 import time
 import pygame.freetype
 import eztext, guielem
+import threading
 pygame.init()
 
 red = 255, 0, 0
@@ -18,6 +19,19 @@ play = True
 updatedareas = []
 pfont = pygame.font.SysFont('opensans', 50)
 font = pygame.freetype.SysFont('opensans', 50)
+clock = pygame.time.Clock()
+
+def quit():
+    global play
+    while play:
+        clock.tick(30)
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            play = False
+            pygame.quit()
+            exit()
+
+threading.Thread(target=quit).start()
 
 def eprompt(p):
     global updatedareas
@@ -47,7 +61,7 @@ def gettext(textlist, rect, numonly):
     else: rest='\'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\\\'()*+,-./:;<=>?@[\]^_`{|}~\''
     words = True
     lineheight = pfont.size(textlist[0])[1]
-    lh = rect.y
+    lh = rect.y - (lineheight*(len(textlist))/2)
     eraser = pygame.Surface((rect.width, lineheight))
     eraser.fill(bg)
     inps=[]
@@ -56,7 +70,6 @@ def gettext(textlist, rect, numonly):
         val = None
         while val == None:
             clock.tick(30)
-            print("i'm trying my best")
             events = pygame.event.get()
             for e in events:
                 if e.type == pygame.QUIT:
@@ -70,13 +83,17 @@ def gettext(textlist, rect, numonly):
             updatedareas = []
         inps += [val]    
         lh += lineheight 
+    eraser = pygame.Surface((rect.width, rect.height))
+    eraser.fill(bg)
+    updatedareas += [cards.screen.blit(eraser,(rect.x, lh-lineheight*len(textlist)))]
+    pygame.display.update(updatedareas)
+    updatedareas = []
     return inps
 
 
 cards.screen.fill(bg)
 pygame.display.update()
-clock = pygame.time.Clock()
-numhumans, numais, numperf = map(lambda x: int(x), gettext(["Enter number of human players: ", "Enter number of new AI players: ", "Enter number of perfect AIs: "], cards.screen.get_rect(x=cards.width/5, y=cards.height/5), True))
+numhumans, numais, numperf = map(lambda x: int(x), gettext(["Enter number of human players: ", "Enter number of new AI players: ", "Enter number of perfect AIs: "], cards.screen.get_rect(x=cards.width/5, y=cards.height/2), True))
 
 
 """try:
@@ -95,18 +112,17 @@ if numhumans + numais + numperf < 2:
 #dicts of default rules based on rank and suit
 rankrules = {'5': "highfive", 'K':"bow", 'Q': "bow", '7':'nice'}
 suitrules = {'H': "ily", 'S':"rave", 'D':'sparkly'}
-
+"""
 inp = input("Would you like a custom set of rules? (Y/N) If no, a default will be used. ").lower()
 if inp == "y":
     rankrules = {}
     suitrules = {}
-    print("""
-    Enter rules in the format \"(Rank/Suit) (Rule)\"
-    For example, \"5 highfive\"
-    Suits are {}
-    Ranks are {}
-    There can only be one rule per suit or rank.
-    Enter \"Start\" to finish rule entry and begin the game""".format(cards.SUITS, cards.RANKS))
+    print( "Enter rules in the format \"(Rank/Suit) (Rule)\"" \
+           "\nFor example, \"5 highfive\"" \
+           "\nSuits are {}" \
+           "\nRanks are {}" \
+           "\nThere can only be one rule per suit or rank." \
+           "\nEnter \"Start\" to finish rule entry and begin the game".format(cards.SUITS, cards.RANKS))
     while True:
         inp = input("Rule: ").split()
         if inp[0] == "Start":
@@ -124,8 +140,7 @@ if inp == "y":
 elif not inp=='n':
     print("Y/N was expected.")
     exit()
-    
-
+"""
 numplayers = numhumans+numais
 cardsinitial = 5
 hums = []
@@ -191,6 +206,17 @@ def playerstatus(player=None):
     updatedareas = []
     
 
+def cardselect(player):
+    while True:
+        events = pygame.event.get()
+        for e in events:
+            for c in player.cards:
+                if e.type == pygame.MOUSEBUTTONDOWN:
+                    if c.is_clicked(False):
+                        return c
+                elif c.is_clicked():
+                    return c
+
 
 def turn(player): #input whose turn it is
     """Get input from player about move and process the player's decision based on game rules"""
@@ -201,8 +227,10 @@ def turn(player): #input whose turn it is
     updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))]
     digit = False
     print(player)
-    updatedareas += [cards.screen.blit(player.image, player.rect)]
+    updatedareas += [cards.screen.blit(player.image, player.rect)] #HANDYHAND
     playerstatus(player)
+    card = cardselect(player)
+    """
     while not digit:
         move = input("Which card will you play? ")
         #player inputs index of card to play and a list of string commands
@@ -227,19 +255,23 @@ def turn(player): #input whose turn it is
             validturn = False
             penalties += 1
             print("That isn't a card in your hand")
-        else:
-            s = player.cards[card].suit
-            r = player.cards[card].rank
+    card = player.cards[card]
+    """
+    if False:
+        print("idk man")
+    else:
+            s = card.suit
+            r = card.rank
             if topcard.suit != s and topcard.rank != r: #check if valid card played
                 validturn = False
                 penalties += 1
                 print("That isn't a valid card")
             else: #check if special rules were followed
                 prevmovefeat.append([s, r]) #store data about card move features
-                penalties += checkmoves(player.cards[card], move)
+                penalties += checkmoves(card, move)
     if validturn:
         spare_deck.add_card(topcard)
-        topcard = player.cards[card]
+        topcard = card
         player.rem_card(player.cards[card])
     penalty(player, penalties)
     if penalties == 1:
@@ -247,7 +279,7 @@ def turn(player): #input whose turn it is
     else:
         print("You have {} penalties".format(penalties))
     print(player)
-    updatedareas += [cards.screen.blit(player.image, player.rect)]
+    updatedareas += [cards.screen.blit(player.image, player.rect)] #HANDYHAND
     pygame.display.update(updatedareas)
     updatedareas = []
 
@@ -391,13 +423,14 @@ while play:
             if huminplay[count][1] == 0:
                 huminplay[count] = (True, 0)
         count += 1
+        time.sleep(1)
     count = 0
     if not play:
         break
     while count < len(aiplayers):
-        eraser = pygame.Surface((cards.width, cards.CARDH))
+        eraser = pygame.Surface((cards.width, cards.CARDH+15))
         eraser.fill(bg)
-        updatedareas += [cards.screen.blit(eraser, handpos)]
+        updatedareas += [cards.screen.blit(eraser, (handpos[0], handpos[1]-15))]
         if aiinplay[count][0]:
             print("AI Player {}".format(count+1))
             playerstatus()

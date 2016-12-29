@@ -46,8 +46,6 @@ class Button(pygame.sprite.Sprite):
             self.inf = (210,210,210)
         return newclick  #mouse released on pressed button
 
-    def click(self):
-        self.inf = (210, 210, 210)
 
 
 class Prompt():
@@ -104,11 +102,10 @@ class TwoButtonPrompt(ButtonPrompt):
         return b1, b2    
         
 def mousecheck(event, buttons):
-    if event.type == pygame.MOUSEBUTTONDOWN:
-        for c in buttons:
+    for c in buttons:
+        if event.type == pygame.MOUSEBUTTONDOWN:
             return  c.is_clicked(False)
-    else:
-        for c in buttons:
+        else:
             return c.is_clicked() 
 """
 print(pygame.font.get_fonts())

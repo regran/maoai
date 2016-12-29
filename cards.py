@@ -1,5 +1,6 @@
 """contains classes for cards, a hand of cards, and a deck of cards for a card game"""
 import random, pygame
+import copy
 pygame.init()
 #global variables for cards
 SUITS = ('C', 'S', 'H', 'D')
@@ -10,12 +11,12 @@ RANKS = ('A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K')
 CARDH = 98
 CARDW = 73
 HANDW = 1800
-size = width, height = 1890, 1080
+size = width, height = [1920, 1080]
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Mao Card Game")
 cards = pygame.image.load("card_images.png").convert() #load image of cards
 cardback = pygame.image.load("card_back.png").convert()
-
+bg = 14, 144, 14 #background color
 
 class Card(pygame.sprite.Sprite):
     """Store a suit and rank for a traditional playing card"""
@@ -31,6 +32,7 @@ class Card(pygame.sprite.Sprite):
             self.image = self.cardimage
             self.rect = self.image.get_rect(x=pos[0], y=pos[1]) #get rekt
             self.back = False
+            self.clicked = False
 
         else:
             self.image = self.cardimage = self.cardback
@@ -40,6 +42,41 @@ class Card(pygame.sprite.Sprite):
             print("Invalid card: ", suit, rank)
         self.rect = self.image.get_rect()
         self.isback = False
+
+    def is_clicked(self, up=True):
+        hovrect = copy.deepcopy(self.rect)
+        hovrect.y = hovrect.y-15
+        updates = []
+        eraser = pygame.Surface((CARDW, CARDH))
+        eraser.fill(bg)
+        click = pygame.mouse.get_pressed()[0] 
+        pos = self.rect.collidepoint(pygame.mouse.get_pos())
+        newclick = pos and self.clicked and not click
+        print(self.rect)
+        if pos and not up: #button pressed down
+            pygame.draw.rect(screen, (227, 193, 13), hovrect, 3)
+            updates += [hovrect]
+            pygame.display.update(updates)
+            updates = []
+            self.clicked = True
+
+        elif pos and not click: #mouseover
+            updates += [screen.blit(eraser, self.rect)]
+            updates += [screen.blit(self.image, hovrect)]
+            pygame.display.update(updates)
+            updates = []
+            self.clicked = False
+            
+        elif not (click or pos): #mouse released and not hovering
+            self.clicked = False
+            updates += [screen.blit(eraser, hovrect)]
+            updates += [screen.blit(self.image, self.rect)]
+            pygame.display.update(updates)
+            updates = []
+            
+        return newclick  #mouse released on pressed button
+
+
 
     def flip(self):
         if not self.isback:
@@ -59,7 +96,7 @@ class Card(pygame.sprite.Sprite):
     def get_rank(self): #return rank of card
         return self.rank
 
-class Hand(pygame.sprite.Sprite):
+class Hand():
     """A hand of cards held by a player"""
     def __init__(self, pos=(0,0)): #create empty hand
         self.cards = []
@@ -82,17 +119,17 @@ class Hand(pygame.sprite.Sprite):
         self.image.blit(card.image, self.posempty)
         card.rect.x = self.rect.x + self.posempty[0]
         card.rect.y = self.rect.y + self.posempty[1]
-        self.posempty = (self.posempty[0]+CARDW/3, 0)
+        self.posempty = (self.posempty[0]+CARDW*6/5, 0)
 
     def rem_card(self, card):
         """Remove a card from the hand"""
-        self.image.blit(self.image, ((self.cards.index(card))*CARDW/3, 0), 
-                       ((self.cards.index(card)+1)*CARDW/3, 0, HANDW - (self.cards.index(card)+2)*CARDW/3, CARDH))
+        self.image.blit(self.image, ((self.cards.index(card))*CARDW*6/5, 0), 
+                       ((self.cards.index(card)+1)*CARDW*6/5, 0, HANDW - (self.cards.index(card)+2)*CARDW*6/5, CARDH))
         if self.cards.index(card) == len(self.cards)-1:
-            self.image.blit(self.cards[self.numcard-2].image, ((self.numcard-2)*CARDW/3, 0))
+            self.image.blit(self.cards[self.numcard-2].image, ((self.numcard-2)*CARDW*6/5, 0))
         self.cards.remove(card)
         self.numcard += -1
-        self.posempty = (self.posempty[0]-CARDW/3, 0)
+        self.posempty = (self.posempty[0]-CARDW*6/5, 0)
 
     def isempty(self):
         """Check if the hand is empty"""
