@@ -279,9 +279,7 @@ def turn(player): #input whose turn it is
     else:
         print("You have {} penalties".format(penalties))
     print(player)
-    updatedareas += [cards.screen.blit(player.image, player.rect)] #HANDYHAND
-    pygame.display.update(updatedareas)
-    updatedareas = []
+
 
 
 def checkmoves(card, moves):
@@ -404,6 +402,9 @@ def cut(player, cardimage):
         prevdistx = abs(cardrect.x - goal[0])
         cardrect = cardrect.move(speed)
 
+eraser = pygame.Surface((cards.width, cards.CARDH+15))
+eraser.fill(bg)
+
 while play:
     turnnum += 1
     count = 0
@@ -411,6 +412,10 @@ while play:
         if huminplay[count][0]: #skip if not in play
             print("Human Player {}".format(count+1))
             turn(hums[count])
+            updatedareas += [cards.screen.blit(eraser, (handpos[0], handpos[1]-15))]
+            cards.screen.blit(hums[count].image, hums[count].rect) #HANDYHAND
+            pygame.display.update(updatedareas)
+            updatedareas = []
             print()
             if hums[count].isempty():
                 print("We have a winner!")
@@ -428,8 +433,6 @@ while play:
     if not play:
         break
     while count < len(aiplayers):
-        eraser = pygame.Surface((cards.width, cards.CARDH+15))
-        eraser.fill(bg)
         updatedareas += [cards.screen.blit(eraser, (handpos[0], handpos[1]-15))]
         if aiinplay[count][0]:
             print("AI Player {}".format(count+1))
