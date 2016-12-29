@@ -420,7 +420,7 @@ def cut(player, cardimage, mult=1):
         prevdistx = abs(cardrect.x - goal[0])
         cardrect = cardrect.move(speed)
 
-eraser = pygame.Surface((cards.width, cards.CARDH+20))
+eraser = pygame.Surface((cards.width+10, cards.CARDH+20))
 eraser.fill(bg)
 previously("GLHF")
 while play:
@@ -430,7 +430,7 @@ while play:
         if huminplay[count][0]: #skip if not in play
             previously("Human Player {}".format(count+1), (255, 255, 255))
             turn(hums[count])
-            updatedareas += [cards.screen.blit(eraser, (handpos[0], handpos[1]-18))]
+            updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
             cards.screen.blit(hums[count].image, hums[count].rect) #HANDYHAND
             pygame.display.update(updatedareas)
             updatedareas = []
@@ -450,7 +450,7 @@ while play:
     if not play:
         break
     while count < len(aiplayers):
-        updatedareas += [cards.screen.blit(eraser, (handpos[0], handpos[1]-18))]
+        updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
         if aiinplay[count][0]:
             previously("AI Player {}".format(count+1), (255, 255, 255))
             playerstatus()
