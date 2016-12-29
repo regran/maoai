@@ -19,6 +19,7 @@ play = True
 updatedareas = []
 pfont = pygame.font.SysFont('opensans', 50)
 font = pygame.freetype.SysFont('opensans', 50)
+smallfont = pygame.freetype.SysFont('opensans', 30)
 clock = pygame.time.Clock()
 
 def quit():
@@ -191,13 +192,19 @@ def playerstatus(player=None):
         ai.hand.rect.x = handpos[0] + i*(cards.CARDW+50)
         ai.hand.rect.y = 100
         updatedareas += [cards.screen.blit(cards.cardback, ai.hand.rect)]
-        font.render_to(cards.screen, (handpos[0]+20+i*(cards.CARDW+50), 105), str(len(ai.hand.cards)), fgcolor=black)
+        rec = font.get_rect(str(len(ai.hand.cards))) 
+        if rec.width > cards.CARDW:
+            smallfont.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 105), None, fgcolor=black)
+        else: font.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 105), None, fgcolor=black)
         i += 1
     for hum in hums:
         if hum == player:
             continue
         updatedareas += [cards.screen.blit(cards.cardback, (handpos[0]+i*(cards.CARDW+50), 100))]
-        font.render_to(cards.screen, (handpos[0]+20+i*(cards.CARDW+50), 105), str(len(hum.cards)), fgcolor=black)
+        rec = font.get_rect(str(len(hum.cards)))
+        if rec.width>cards.CARDW:
+            smallfont.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 105), None, fgcolor=black)
+        else: font.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 105), None, fgcolor=black)
         i += 1
     eraser = pygame.Surface((cards.width, cards.CARDH))
     eraser.fill(bg)
