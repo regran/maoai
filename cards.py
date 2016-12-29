@@ -20,7 +20,7 @@ bg = 14, 144, 14 #background color
 
 class Card(pygame.sprite.Sprite):
     """Store a suit and rank for a traditional playing card"""
-    def __init__(self, suit, rank, pos=(0,0)):
+    def __init__(self, suit=None, rank=None, pos=(0,0)):
         pygame.sprite.Sprite.__init__(self)
         self.cardback = pygame.image.load("card_back.png").convert()
         if (suit in SUITS) and (rank in RANKS): #make sure suit and rank are valid
@@ -43,14 +43,15 @@ class Card(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.isback = False
 
-    def is_clicked(self, up=True):
+    def is_clicked(self, up=True, checkpos=True):
         hovrect = copy.deepcopy(self.rect)
         hovrect.y = hovrect.y-15
         updates = []
-        eraser = pygame.Surface((CARDW, CARDH))
+        eraser = pygame.Surface((CARDW+8, CARDH+5))
         eraser.fill(bg)
-        click = pygame.mouse.get_pressed()[0] 
-        pos = self.rect.collidepoint(pygame.mouse.get_pos())
+        click = pygame.mouse.get_pressed()[0]
+        if checkpos: pos=self.rect.collidepoint(pygame.mouse.get_pos())
+        else: pos = False
         newclick = pos and self.clicked and not click
         if pos and not up: #button pressed down
             pygame.draw.rect(screen, (227, 193, 13), hovrect, 3)
@@ -58,9 +59,11 @@ class Card(pygame.sprite.Sprite):
             pygame.display.update(updates)
             updates = []
             self.clicked = True
+            print("click")
+            print(newclick)
 
         elif pos and not click: #mouseover
-            updates += [screen.blit(eraser, self.rect)]
+            updates += [screen.blit(eraser, (self.rect.x-4, self.rect.y-3))]
             updates += [screen.blit(self.image, hovrect)]
             pygame.display.update(updates)
             updates = []
@@ -68,7 +71,7 @@ class Card(pygame.sprite.Sprite):
             
         elif not (click or pos): #mouse released and not hovering
             self.clicked = False
-            updates += [screen.blit(eraser, hovrect)]
+            updates += [screen.blit(eraser, (hovrect.x-4, hovrect.y-3))]
             updates += [screen.blit(self.image, self.rect)]
             pygame.display.update(updates)
             updates = []
@@ -137,7 +140,7 @@ class Hand():
         """Check if the hand is empty"""
         return self.cards == []
 
-class Deck(pygame.sprite.Sprite):
+class Deck(Card):
     """A traditional deck of playing cards (without jokers)"""
     def __init__(self, pos=(0,0)):
         self.deck = []	# create a Deck object
@@ -147,6 +150,7 @@ class Deck(pygame.sprite.Sprite):
                 self.deck.append(card)
         self.image = cardback
         self.rect = self.image.get_rect(x=pos[0], y=pos[1])
+        self.clicked = False
 
     def shuffle(self):
         """Shuffle the cards in the deck"""

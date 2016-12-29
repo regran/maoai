@@ -154,11 +154,14 @@ deckpos = (cards.width/2-cards.CARDW/2-50, cards.height/2-cards.CARDH/2)
 handpos = (100, 900) 
 
 lines = []
+colors = []
 prevrec = pygame.Rect(cards.width*3/5, 100+cards.CARDH, cards.width*2/5, handpos[1]-100-cards.CARDH)
-def previously(newtext):
-    global lines, updatedareas
-    lines += guielem.wrapline(smallfont, newtext, prevrec)
-    print(lines)
+def previously(newtext, color=black):
+    global lines, updatedareas, colors
+    newl = guielem.wrapline(smallfont, newtext, prevrec)
+    for n in newl:
+        colors += [color]
+    lines += newl
     lh = 0
     lineheight = smallfont.get_sized_glyph_height()
     eraser = pygame.Surface((prevrec.width, prevrec.height))
@@ -166,10 +169,9 @@ def previously(newtext):
     updatedareas += [cards.screen.blit(eraser, prevrec)]
     while len(lines)*lineheight>prevrec.height:
         lines = lines[1:]
-    for l in lines:
-        print(l)
-        print(prevrec.x, prevrec.y+lh)
-        smallfont.render_to(cards.screen, (prevrec.x, prevrec.y + lh), l, fgcolor=black)
+        colors = colors[1:]
+    for l in range(len(lines)):
+        smallfont.render_to(cards.screen, (prevrec.x, prevrec.y + lh), lines[l], fgcolor=colors[l])
         lh += lineheight
     pygame.display.update(updatedareas)
     updatedareas = []
@@ -242,7 +244,11 @@ def cardselect(player):
                         return c
                 elif c.is_clicked():
                     return c
-
+            if e.type == pygame.MOUSEBUTTONDOWN:
+                if deck.is_clicked(False):
+                    return deck
+            elif deck.is_clicked():
+                    return deck
 
 def turn(player): #input whose turn it is
     """Get input from player about move and process the player's decision based on game rules"""
@@ -255,23 +261,22 @@ def turn(player): #input whose turn it is
     playerstatus(player)
     print(player)
     card = cardselect(player)
-    [move] = gettext(["Special actions: "], pygame.Rect(handpos[0], (deckpos[1]+handpos[1])/2, cards.width-prevrec.width-handpos[0], deckpos[1]-handpos[1]))
-    if move == "gg ez":        #im allowed to have fun in my code
-        cards.screen.fill(bg)
-        jokefont.render_to(cards.screen, (cards.width/2, cards.height/2), "wow", fgcolor=red)
-        pygame.display.flip()
-        play = False #end the game without errors
-        time.sleep(5)
-        exit()
-    move = move.split()
-    s = card.suit
-    r = card.rank
-    if topcard.suit != s and topcard.rank != r: #check if valid card played
+    if card == deck or (topcard.suit != card.suit and topcard.rank != card.rank): #check if valid card played
         validturn = False
+        deck.is_clicked(False, False)
         penalties += 1
         previously("Invalid card")
     else: #check if special rules were followed
-        prevmovefeat.append([s, r]) #store data about card move features
+        [move] = gettext(["Special actions: "], pygame.Rect(handpos[0], (deckpos[1]+handpos[1])/2, cards.width-prevrec.width-handpos[0], deckpos[1]-handpos[1]))
+        if move == "gg ez":        #im allowed to have fun in my code
+            cards.screen.fill(bg)
+            jokefont.render_to(cards.screen, (cards.width/2, cards.height/2), "wow", fgcolor=red)
+            pygame.display.flip()
+            play = False #end the game without errors
+            time.sleep(5)
+            exit()
+        move = move.split()
+        prevmovefeat.append([card.suit, card.rank]) #store data about card move features
         previously("Actions: {}".format(move))
         penalties += checkmoves(card, move)
     if validturn:
@@ -325,8 +330,9 @@ def checkturn(ai, moves):
         previously("Played {}".format(top))
         previously("Actions: {}".format(actions))
         prevmovefeat.append([top.suit, top.rank]) #store data about card features
-        cut(ai.hand, topcard.image, -1)
-        updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))]
+        cut(ai.hand, top.image, -1)
+        updatedareas += [cards.screen.blit(top.image, (deckpos[0]+100, deckpos[1]))]
+        print(topcard)
         playerstatus()
         penalties += checkmoves(top, actions)
         spare_deck.add_card(topcard)
@@ -414,7 +420,7 @@ def cut(player, cardimage, mult=1):
         prevdistx = abs(cardrect.x - goal[0])
         cardrect = cardrect.move(speed)
 
-eraser = pygame.Surface((cards.width, cards.CARDH+15))
+eraser = pygame.Surface((cards.width, cards.CARDH+20))
 eraser.fill(bg)
 previously("GLHF")
 while play:
@@ -422,9 +428,9 @@ while play:
     count = 0
     while count < len(hums): #go through the human players and have them go
         if huminplay[count][0]: #skip if not in play
-            previously("Human Player {}".format(count+1))
+            previously("Human Player {}".format(count+1), (255, 255, 255))
             turn(hums[count])
-            updatedareas += [cards.screen.blit(eraser, (handpos[0], handpos[1]-15))]
+            updatedareas += [cards.screen.blit(eraser, (handpos[0], handpos[1]-18))]
             cards.screen.blit(hums[count].image, hums[count].rect) #HANDYHAND
             pygame.display.update(updatedareas)
             updatedareas = []
@@ -444,9 +450,9 @@ while play:
     if not play:
         break
     while count < len(aiplayers):
-        updatedareas += [cards.screen.blit(eraser, (handpos[0], handpos[1]-15))]
+        updatedareas += [cards.screen.blit(eraser, (handpos[0], handpos[1]-18))]
         if aiinplay[count][0]:
-            previously("AI Player {}".format(count+1))
+            previously("AI Player {}".format(count+1), (255, 255, 255))
             playerstatus()
             checkturn(aiplayers[count], aiplayers[count].turn(topcard, prevmovefeat, prevmovelab))
             updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))]
