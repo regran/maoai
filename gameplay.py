@@ -21,6 +21,7 @@ pfont = pygame.font.SysFont('opensans', 50)
 font = pygame.freetype.SysFont('opensans', 50)
 smallfont = pygame.freetype.SysFont('opensans', 30)
 clock = pygame.time.Clock()
+jokefont = pygame.freetype.SysFont('comicsans', 100)
 
 def quit():
     global play
@@ -93,6 +94,7 @@ def gettext(textlist, rect, numonly=False):
     updatedareas = []
     return inps
 
+        
 
 cards.screen.fill(bg)
 pygame.display.update()
@@ -151,6 +153,22 @@ deck = None
 deckpos = (cards.width/2-cards.CARDW/2-50, cards.height/2-cards.CARDH/2)
 handpos = (100, 900) 
 
+lines = []
+prevrec = pygame.Rect(deckpos[0]+200, deckpos[1], cards.width-deckpos[0]-200, cards.height-deckpos[1])
+def previously(newtext):
+    global lines
+    lines += guielem.wrapline(smallfont, newtext, prevrec)
+    lh = 0
+    lineheight = smallfont.get_sized_glyph_height()
+    eraser = Surface((prevrec.width, prevrec.height))
+    updatedareas += cards.screen.blit(eraser, prevrec)
+    pygame.display.update(updatedareas)
+    updatedareas = []
+    while len(lines)*lineheight>prevrec.height:
+        lines = lines[1:]
+    for l in lines:
+        smallfont.render_to(cards.screen, (prevrec.x, prevrec.y + lh), l, fgcolor=black)
+        lh += lineheight
 
 def deal(numhum, numai, cardsphand): #The parameters are number human players, number of ai players
     """Initiate a game, asking how many players there are and dealing cards"""
@@ -226,28 +244,29 @@ def turn(player): #input whose turn it is
     global topcard, play, updatedareas
     penalties = 0
     validturn = True
-    print(topcard)
     updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))]
     digit = False
-    print(player)
     updatedareas += [cards.screen.blit(player.image, player.rect)] #HANDYHAND
     playerstatus(player)
     card = cardselect(player)
-    move = gettext(["Special actions: "], pygame.Rect(handpos[0], (deckpos[1]+handpos[1])/2, cards.width-handpos[0]*2, deckpos[1]-handpos[1]))
+    [move] = gettext(["Special actions: "], pygame.Rect(handpos[0], (deckpos[1]+handpos[1])/2, cards.width-handpos[0]*2, deckpos[1]-handpos[1]))
     if move == "gg ez":        #im allowed to have fun in my code
-        print("wow")
+        cards.screen.fill(bg)
+        jokefont.render_to(cards.screen, (cards.width/2, cards.height/2), "wow", fgcolor=red)
+        pygame.display.flip()
         play = False #end the game without errors
-        return
-    
-        s = card.suit
-        r = card.rank
-        if topcard.suit != s and topcard.rank != r: #check if valid card played
-            validturn = False
-            penalties += 1
-            print("That isn't a valid card")
-        else: #check if special rules were followed
-            prevmovefeat.append([s, r]) #store data about card move features
-            penalties += checkmoves(card, move)
+        time.sleep(5)
+        exit()
+    move = move.split()
+    s = card.suit
+    r = card.rank
+    if topcard.suit != s and topcard.rank != r: #check if valid card played
+        validturn = False
+        penalties += 1
+        print("That isn't a valid card")
+    else: #check if special rules were followed
+        prevmovefeat.append([s, r]) #store data about card move features
+        penalties += checkmoves(card, move)
     if validturn:
         spare_deck.add_card(topcard)
         topcard = card
