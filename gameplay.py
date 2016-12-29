@@ -57,7 +57,7 @@ def eprompt(p):
     updatedareas = []
    
 
-def gettext(textlist, rect, numonly):
+def gettext(textlist, rect, numonly=False):
     global updatedareas
     if numonly:
         rest='01234567890'
@@ -86,7 +86,7 @@ def gettext(textlist, rect, numonly):
             updatedareas = []
         inps += [val]    
         lh += lineheight 
-    eraser = pygame.Surface((rect.width, rect.height))
+    eraser = pygame.Surface((rect.width, lineheight*len(textlist)))
     eraser.fill(bg)
     updatedareas += [cards.screen.blit(eraser,(rect.x, lh-lineheight*len(textlist)))]
     pygame.display.update(updatedareas)
@@ -99,14 +99,6 @@ pygame.display.update()
 numhumans, numais, numperf = map(lambda x: int(x), gettext(["Enter number of human players: ", "Enter number of new AI players: ", "Enter number of perfect AIs: "], cards.screen.get_rect(x=cards.width/5, y=cards.height/2), True))
 
 
-"""try:
-    numhumans = int(input("Enter number of human players: "))
-    numais = int(input("Enter number of new AI players: "))
-    numperf = int(input("Enter number of perfect AIs: "))
-except ValueError:
-    print("A number was expected.")
-    play = False
-    exit()"""
 if numhumans + numais + numperf < 2:
     eprompt(guielem.ButtonPrompt("That isn't a valid number of players. Think about what a sad and lonely person you are. ", cards.width/2, cards.height/2, cards.width/3, cards.height/5, "Exit"))
     play = False
@@ -115,6 +107,8 @@ if numhumans + numais + numperf < 2:
 #dicts of default rules based on rank and suit
 rankrules = {'5': "highfive", 'K':"bow", 'Q': "bow", '7':'nice'}
 suitrules = {'H': "ily", 'S':"rave", 'D':'sparkly'}
+
+#keeping here in case I want to implement grahical custom rules
 """
 inp = input("Would you like a custom set of rules? (Y/N) If no, a default will be used. ").lower()
 if inp == "y":
@@ -239,49 +233,25 @@ def turn(player): #input whose turn it is
     updatedareas += [cards.screen.blit(player.image, player.rect)] #HANDYHAND
     playerstatus(player)
     card = cardselect(player)
-    """
-    while not digit:
-        move = input("Which card will you play? ")
-        #player inputs index of card to play and a list of string commands
-        if move == "gg ez":        #im allowed to have fun in my code
-            print("wow")
-            play = False #end the game without errors
-            return
-        move = move.split()
-        if move == []:
-            validturn = False
-            print("No card was played")
-            penalties += 1
-            break
-        if move[0].isdigit():
-            card = int(move[0])
-            del move[0]
-            digit = True
-        else:
-            print("A positive integer was expected as your first word. Please try again.")
-    else:
-        if card >= len(player.cards): #check if index of card in hand
+    move = gettext(["Special actions: "], pygame.Rect(handpos[0], (deckpos[1]+handpos[1])/2, cards.width-handpos[0]*2, deckpos[1]-handpos[1]))
+    if move == "gg ez":        #im allowed to have fun in my code
+        print("wow")
+        play = False #end the game without errors
+        return
+    
+        s = card.suit
+        r = card.rank
+        if topcard.suit != s and topcard.rank != r: #check if valid card played
             validturn = False
             penalties += 1
-            print("That isn't a card in your hand")
-    card = player.cards[card]
-    """
-    if False:
-        print("idk man")
-    else:
-            s = card.suit
-            r = card.rank
-            if topcard.suit != s and topcard.rank != r: #check if valid card played
-                validturn = False
-                penalties += 1
-                print("That isn't a valid card")
-            else: #check if special rules were followed
-                prevmovefeat.append([s, r]) #store data about card move features
-                penalties += checkmoves(card, move)
+            print("That isn't a valid card")
+        else: #check if special rules were followed
+            prevmovefeat.append([s, r]) #store data about card move features
+            penalties += checkmoves(card, move)
     if validturn:
         spare_deck.add_card(topcard)
         topcard = card
-        player.rem_card(player.cards[card])
+        player.rem_card(card)
     penalty(player, penalties)
     if penalties == 1:
         print("You have 1 penalty")
@@ -367,9 +337,7 @@ def penalty(who, oops): #input hand and number of penalties
         cut(who, c.image)
         if who.rect.y == 100:
             c.flip() #so AI will play card flipped correctly
-        print(len(who.cards))
         who.add_card(c)
-        print(len(who.cards))
         playerstatus(who)
 
 def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is
