@@ -457,7 +457,7 @@ while play:
             checkturn(aiplayers[count], aiplayers[count].turn(topcard, prevmovefeat, prevmovelab))
             updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))]
             if aiplayers[count].hand.isempty():
-                eprompt(guielem.ButtonPrompt("AI Player {}: GG EZ".format(count+1), cards.width/2, cards.height/2, cards.width/3, cards.height/5, "gg"))
+                eprompt(guielem.ButtonPrompt("AI Player {}: GG EZ".format(count+1), cards.width/2, cards.height/2, cards.width/3, cards.height/5, "GG"))
                 play = False
                 break
             time.sleep(1) #pause between turns
