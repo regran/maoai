@@ -333,8 +333,7 @@ def checkturn(ai, moves):
         prevmovefeat.append([top.suit, top.rank]) #store data about card features
         cut(ai.hand, topcard.image, -1)
         updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))]
-        pygame.display.update(updatedareas)
-        updatedareas = []
+        playerstatus()
         penalties += checkmoves(top, actions)
         spare_deck.add_card(topcard)
     topcard = top
@@ -368,7 +367,9 @@ def penalty(who, oops): #input hand and number of penalties
         cut(who, c.image)
         if who.rect.y == 100:
             c.flip() #so AI will play card flipped correctly
+        print(len(who.cards))
         who.add_card(c)
+        print(len(who.cards))
         playerstatus(who)
 
 def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is
