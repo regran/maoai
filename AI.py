@@ -15,13 +15,12 @@ class AI:
         validturn = True
         for card in self.hand.cards:
             if card.rank == topcard.rank or card.suit == topcard.suit:
-                self.hand.rem_card(card)
+                self.hand.rem_card(card, True)
                 print("Card played is {}".format(card))
                 topcard = card
                 break
         else:
             validturn = False
-        self.hand.posempty = (0, 0)
         return topcard, validturn
 
 class AIperf(AI):

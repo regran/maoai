@@ -203,7 +203,7 @@ def deal(numhum, numai, cardsphand): #The parameters are number human players, n
         for i in range(cardsphand):
             if deck.isempty():
                 deck.deck += cards.Deck().deck
-            ai.hand.add_card(deck.deal_card())
+            ai.hand.add_card(deck.deal_card(), True)
 
 def playerstatus(player=None):
     """Display number of cards held by other players at top"""
@@ -370,7 +370,8 @@ def penalty(who, oops): #input hand and number of penalties
         cut(who, c.image)
         if who.rect.y == 100:
             c.flip() #so AI will play card flipped correctly
-        who.add_card(c)
+            who.add_card(c, True)
+        else: who.add_card(c)
         playerstatus(who)
 
 def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is

@@ -12,7 +12,7 @@ CARDH = 98
 CARDW = 73
 HANDW = 1800
 size = width, height = [1920, 1080]
-screen = pygame.display.set_mode(size)
+screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 pygame.display.set_caption("Mao Card Game")
 cards = pygame.image.load("card_images.png").convert() #load image of cards
 cardback = pygame.image.load("card_back.png").convert()
@@ -114,16 +114,17 @@ class Hand():
             ans += str(i)+", "
         return "Hand contains: " + ans # return a string representation of a hand
 
-    def add_card(self, card):
+    def add_card(self, card, AI=False):
         """Add a card to the hand"""
         self.cards.append(card)	# add a card object to a hand
         self.numcard += 1
         self.image.blit(card.image, self.posempty)
         card.rect.x = self.rect.x + self.posempty[0]
         card.rect.y = self.rect.y + self.posempty[1]
-        self.posempty = (self.posempty[0]+CARDW*6/5, 0)
+        if not AI:
+            self.posempty = (self.posempty[0]+CARDW*6/5, 0)
 
-    def rem_card(self, card):
+    def rem_card(self, card, AI=False):
         """Remove a card from the hand"""
         i = self.cards.index(card)
         self.image.blit(self.image, (i*CARDW*6/5, 0), 
@@ -134,7 +135,8 @@ class Hand():
             self.image.blit(self.cards[self.numcard-2].image, ((self.numcard-2)*CARDW*6/5, 0))
         self.cards.remove(card)
         self.numcard += -1
-        self.posempty = (self.posempty[0]-CARDW*6/5, 0)
+        if not AI:
+            self.posempty = (self.posempty[0]-CARDW*6/5, 0)
 
     def isempty(self):
         """Check if the hand is empty"""
