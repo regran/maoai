@@ -3,10 +3,10 @@ import random, pygame
 import copy
 pygame.init()
 #global variables for cards
-SUITS = ('C', 'S', 'H', 'D')
-VALUES = {'A':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,
-          'T':10, 'J':10, 'Q':10, 'K':10}
-RANKS = ('A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K')
+SUITS = ('Clubs', 'Spades', 'Hearts', 'Diamonds')
+VALUES = {'Ace':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,
+          '10':10, 'Jack':10, 'Queen':10, 'King':10}
+RANKS = ('Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King')
 
 CARDH = 98
 CARDW = 73
@@ -59,8 +59,6 @@ class Card(pygame.sprite.Sprite):
             pygame.display.update(updates)
             updates = []
             self.clicked = True
-            print("click")
-            print(newclick)
 
         elif pos and not click: #mouseover
             updates += [screen.blit(eraser, (self.rect.x-4, self.rect.y-3))]
@@ -90,7 +88,7 @@ class Card(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
     def __str__(self):
-        return self.rank+':'+self.suit
+        return self.rank+' of '+self.suit
 
     def get_suit(self): #return suit of card
         return self.suit

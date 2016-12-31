@@ -107,8 +107,8 @@ if numhumans + numais + numperf < 2:
     exit()
 
 #dicts of default rules based on rank and suit
-rankrules = {'5': "highfive", 'K':"bow", 'Q': "bow", '7':'nice'}
-suitrules = {'H': "ily", 'S':"rave", 'D':'sparkly'}
+rankrules = {'5': "highfive", 'King':"bow", 'Queen': "bow", '7':'nice'}
+suitrules = {'Hearts': "ily", 'Spades':"rave", 'Diamonds':'sparkly'}
 
 #keeping here in case I want to implement grahical custom rules
 """
@@ -155,7 +155,7 @@ handpos = (100, 900)
 
 lines = []
 colors = []
-prevrec = pygame.Rect(cards.width*3/5, 100+cards.CARDH, cards.width*2/5, handpos[1]-100-cards.CARDH)
+prevrec = pygame.Rect(cards.width*3/5, 100+cards.CARDH, cards.width*2/5, handpos[1]-100-cards.CARDH-20)
 def previously(newtext, color=black):
     global lines, updatedareas, colors
     newl = guielem.wrapline(smallfont, newtext, prevrec)
@@ -261,7 +261,6 @@ def turn(player): #input whose turn it is
     digit = False
     updatedareas += [cards.screen.blit(player.image, player.rect)] #HANDYHAND
     playerstatus(player)
-    print(player)
     pygame.event.clear()
     card = cardselect(player)
     if card == deck or (topcard.suit != card.suit and topcard.rank != card.rank): #check if valid card played
@@ -286,6 +285,7 @@ def turn(player): #input whose turn it is
         spare_deck.add_card(topcard)
         topcard = card
         player.rem_card(card)
+        previously("Played {}".format(card))
     penalty(player, penalties)
     if penalties == 1:
         previously("1 penalty")
@@ -335,7 +335,6 @@ def checkturn(ai, moves):
         prevmovefeat.append([top.suit, top.rank]) #store data about card features
         cut(ai.hand, top.image, -1)
         updatedareas += [cards.screen.blit(top.image, (deckpos[0]+100, deckpos[1]))]
-        print(topcard)
         playerstatus()
         penalties += checkmoves(top, actions)
         spare_deck.add_card(topcard)
