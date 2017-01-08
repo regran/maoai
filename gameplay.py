@@ -17,9 +17,9 @@ white = 0, 0, 0
 bg = 14, 144, 14 #background color
 play = True
 updatedareas = []
-pfont = pygame.font.SysFont('opensans', 50)
-font = pygame.freetype.SysFont('opensans', 50)
-smallfont = pygame.freetype.SysFont('opensans', 30)
+pfont = pygame.font.SysFont('roboto', 50)
+font = pygame.freetype.SysFont('roboto', 50)
+smallfont = pygame.freetype.SysFont('roboto', 30)
 clock = pygame.time.Clock()
 jokefont = pygame.freetype.SysFont('comicsans', 100)
 
@@ -155,18 +155,20 @@ handpos = (100, 900)
 
 lines = []
 colors = []
-prevrec = pygame.Rect(cards.width*3/5, 100+cards.CARDH, cards.width*2/5, handpos[1]-100-cards.CARDH-20)
+prevrec = pygame.Rect(cards.width*7/10, 150+cards.CARDH, cards.width*3/10, handpos[1]-150-cards.CARDH-20)
 def previously(newtext, color=black):
     global lines, updatedareas, colors
+    back = pygame.Surface((prevrec.width, prevrec.height+20))
+    back.fill((155,155,155))
     newl = guielem.wrapline(smallfont, newtext, prevrec)
     for n in newl:
         colors += [color]
     lines += newl
-    lh = 0
     lineheight = smallfont.get_sized_glyph_height()
+    lh = 0
     eraser = pygame.Surface((prevrec.width, prevrec.height))
     eraser.fill(bg)
-    updatedareas += [cards.screen.blit(eraser, prevrec)]
+    updatedareas += [cards.screen.blit(back, (prevrec.x, prevrec.y-20))]
     while len(lines)*lineheight>prevrec.height:
         lines = lines[1:]
         colors = colors[1:]
@@ -269,7 +271,7 @@ def turn(player): #input whose turn it is
         penalties += 1
         previously("Invalid card")
     else: #check if special rules were followed
-        [move] = gettext(["Special actions: "], pygame.Rect(handpos[0], (deckpos[1]+handpos[1])/2, cards.width-prevrec.width-handpos[0], deckpos[1]-handpos[1]))
+        [move] = gettext(["Special actions: "], pygame.Rect(handpos[0], (deckpos[1]+handpos[1]+cards.CARDH)/2, cards.width-prevrec.width-handpos[0], deckpos[1]-handpos[1]))
         if move == "gg ez":        #im allowed to have fun in my code
             cards.screen.fill(bg)
             jokefont.render_to(cards.screen, (cards.width/2, cards.height/2), "wow", fgcolor=red)
