@@ -38,6 +38,9 @@ if inp == "y":
         if len(inp) != 2:
             print("Two words were expected. Please try again or say \"Start\"")
             continue
+        if inp[0] in list(rankrules.keys()):
+            print("There is already a rule for that suit or rank. It has not been updated.")
+            continue 
         if inp[0] in cards.SUITS: 
             suitrules.update({inp[0]:inp[1]})
         elif inp[0] in cards.RANKS:
