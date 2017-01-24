@@ -3,32 +3,43 @@ import random, pygame
 import copy
 pygame.init()
 #global variables for cards
-SUITS = ('Clubs', 'Spades', 'Hearts', 'Diamonds')
+SUITS = ('Diamonds', 'Hearts', 'Clubs', 'Spades')
 VALUES = {'Ace':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,
           '10':10, 'Jack':10, 'Queen':10, 'King':10}
 RANKS = ('Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King')
 
-CARDH = 98
-CARDW = 73
+CARD = CARDW, CARDH = 225, 315
+smallCARD = smallCARDW, smallCARDH = 112, 157
+medCARD = medCARDW, medCARDH = 150, 210
 HANDW = 1800
 size = width, height = [1920, 1080]
 screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 pygame.display.set_caption("Mao Card Game")
-cards = pygame.image.load("card_images.png").convert() #load image of cards
-cardback = pygame.image.load("card_back.png").convert()
+smallcards = pygame.image.load("cardimages_small.png").convert()
+medcards = pygame.image.load("cardimages_med.png").convert()
+cards = pygame.image.load("cardimages.png").convert() #load image of cards
+cardback = pygame.image.load("cardback_small.png").convert()
+d = pygame.image.load("cardback_med.png").convert()
 bg = 14, 144, 14 #background color
 
 class Card(pygame.sprite.Sprite):
     """Store a suit and rank for a traditional playing card"""
-    def __init__(self, suit=None, rank=None, pos=(0,0)):
+    def __init__(self, suit=None, rank=None, pos=(0,0), med=False):
         pygame.sprite.Sprite.__init__(self)
-        self.cardback = pygame.image.load("card_back.png").convert()
+        self.cardback = cardback
         if (suit in SUITS) and (rank in RANKS): #make sure suit and rank are valid
             self.suit = suit
             self.rank = rank
-            card = pygame.Surface((CARDW, CARDH)) #get a specific card from sheet of cards
-            card.blit(cards, (0, 0), (RANKS.index(self.rank)*CARDW, SUITS.index(self.suit)*CARDH, CARDW, CARDH))
-            self.cardimage = card
+            self.card = pygame.Surface(CARD) #get a specific card from sheet of cards
+            self.cardmed = pygame.Surface(medCARD)
+            self.cardsmall = pygame.Surface(smallCARD)
+            self.card.blit(cards, (0, 0), (RANKS.index(self.rank)*CARDW, SUITS.index(self.suit)*CARDH, CARDW, CARDH))
+            self.cardmed.blit(medcards, (0, 0), (RANKS.index(self.rank)*medCARDW, SUITS.index(self.suit)*medCARDH, medCARDW, medCARDH))
+            self.cardsmall.blit(smallcards, (0, 0), (RANKS.index(self.rank)*smallCARDW, SUITS.index(self.suit)*smallCARDH, smallCARDW, smallCARDH))
+           #self.cardimage = pygame.transform.scale(card, (75, 105))
+            self.cardimage = self.card
+            if med:
+                self.cardimage = self.cardmed
             self.image = self.cardimage
             self.rect = self.image.get_rect(x=pos[0], y=pos[1]) #get rekt
             self.back = False
@@ -43,11 +54,29 @@ class Card(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.isback = False
 
+    def toBig(self):
+        self.cardimage = card
+        self.image = self.cardimage
+        self.rect = self.image.get_rect(x=self.rect.x, y=self.rect.y)
+        return self
+
+    def toMed(self):
+        self.cardimage = self.cardmed
+        self.image = self.cardimage
+        self.rect = self.image.get_rect(x=self.rect.x, y=self.rect.y)
+        return self
+
+    def toSmall(self):
+        self.cardimage = self.cardsmall
+        self.image = self.cardimage
+        self.rect = self.image.get_rect(x=self.rect.x, y=self.rect.y)
+        return self
+
     def is_clicked(self, up=True, checkpos=True):
         hovrect = copy.deepcopy(self.rect)
         hovrect.y = hovrect.y-15
         updates = []
-        eraser = pygame.Surface((CARDW+8, CARDH+5))
+        eraser = pygame.Surface((self.rect.width+8, self.rect.height+5))
         eraser.fill(bg)
         click = pygame.mouse.get_pressed()[0]
         if checkpos: pos=self.rect.collidepoint(pygame.mouse.get_pos())
@@ -148,7 +177,7 @@ class Deck(Card):
             for rank in RANKS:
                 card = Card(suit, rank)
                 self.deck.append(card)
-        self.image = cardback
+        self.image = d
         self.rect = self.image.get_rect(x=pos[0], y=pos[1])
         self.clicked = False
 

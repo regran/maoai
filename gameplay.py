@@ -150,12 +150,12 @@ prevmovelab = []
 prevmovefeat = []
 spare_deck = None
 deck = None
-deckpos = (cards.width/2-cards.CARDW/2-50, cards.height/2-cards.CARDH/2)
+deckpos = (cards.width/2-cards.medCARDW/2-100, cards.height/2-cards.medCARDH/2)
 handpos = (100, 900) 
 
 lines = []
 colors = []
-prevrec = pygame.Rect(cards.width*7/10, 150+cards.CARDH, cards.width*3/10, handpos[1]-150-cards.CARDH-20)
+prevrec = pygame.Rect(cards.width*7/10, 150+cards.smallCARDH, cards.width*3/10, handpos[1]-150-cards.CARDH-20)
 def previously(newtext, color=black):
     global lines, updatedareas, colors
     back = pygame.Surface((prevrec.width, prevrec.height+20))
@@ -212,28 +212,28 @@ def playerstatus(player=None):
     global updatedareas
     i = 0
     for ai in aiplayers:
-        ai.hand.rect.x = handpos[0] + i*(cards.CARDW+50)
+        ai.hand.rect.x = handpos[0] + i*(cards.smallCARDW+50)
         ai.hand.rect.y = 100
         updatedareas += [cards.screen.blit(cards.cardback, ai.hand.rect)]
         rec = font.get_rect(str(len(ai.hand.cards))) 
-        if rec.width > cards.CARDW:
+        if rec.width > cards.smallCARDW:
             rec=smallfont.get_rect(str(len(hum.cards)))
-            smallfont.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 100+cards.CARDH/2-rec.height/2), None, fgcolor=black)
-        else: font.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 100+cards.CARDH/2-rec.height/2), None, fgcolor=black)
+            smallfont.render_to(cards.screen, (handpos[0]+cards.smallCARDW/2-rec.width/2+i*(cards.smallCARDW+50), 100+cards.smallCARDH/2-rec.height/2), None, fgcolor=black)
+        else: font.render_to(cards.screen, (handpos[0]+cards.smallCARDW/2-rec.width/2+i*(cards.smallCARDW+50), 100+cards.smallCARDH/2-rec.height/2), None, fgcolor=black)
         i += 1
     for hum in hums:
         if hum == player:
             continue
-        updatedareas += [cards.screen.blit(cards.cardback, (handpos[0]+i*(cards.CARDW+50), 100))]
+        updatedareas += [cards.screen.blit(cards.cardback, (handpos[0]+i*(cards.smallCARDW+50), 100))]
         rec = font.get_rect(str(len(hum.cards)))
-        if rec.width>cards.CARDW:
+        if rec.width>cards.smallCARDW:
             rec=smallfont.get_rect(str(len(hum.cards)))
-            smallfont.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 100+cards.CARDH/2-rec.height/2), None, fgcolor=black)
-        else: font.render_to(cards.screen, (handpos[0]+cards.CARDW/2-rec.width/2+i*(cards.CARDW+50), 100+cards.CARDH/2-rec.height/2), None, fgcolor=black)
+            smallfont.render_to(cards.screen, (handpos[0]+cards.smallCARDW/2-rec.width/2+i*(cards.smallCARDW+50), 100+cards.smallCARDH/2-rec.height/2), None, fgcolor=black)
+        else: font.render_to(cards.screen, (handpos[0]+cards.smallCARDW/2-rec.width/2+i*(cards.smallCARDW+50), 100+cards.smallCARDH/2-rec.height/2), None, fgcolor=black)
         i += 1
-    eraser = pygame.Surface((cards.width, cards.CARDH))
+    eraser = pygame.Surface((cards.width, cards.smallCARDH))
     eraser.fill(bg)
-    updatedareas += [cards.screen.blit(eraser, (handpos[0]+i*(cards.CARDW+50), 100))]
+    updatedareas += [cards.screen.blit(eraser, (handpos[0]+i*(cards.smallCARDW+50), 100))]
     pygame.display.update(updatedareas)
     updatedareas = []
     
@@ -259,7 +259,7 @@ def turn(player): #input whose turn it is
     global topcard, play, updatedareas
     penalties = 0
     validturn = True
-    updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))]
+    updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+200, deckpos[1]))]
     digit = False
     updatedareas += [cards.screen.blit(player.image, player.rect)] #HANDYHAND
     playerstatus(player)
@@ -285,7 +285,7 @@ def turn(player): #input whose turn it is
         penalties += checkmoves(card, move)
     if validturn:
         spare_deck.add_card(topcard)
-        topcard = card
+        topcard = card.toMed()
         player.rem_card(card)
         previously("Played {}".format(card))
     penalty(player, penalties)
@@ -335,12 +335,12 @@ def checkturn(ai, moves):
         previously("Played {}".format(top))
         previously("Actions: {}".format(actions))
         prevmovefeat.append([top.suit, top.rank]) #store data about card features
-        cut(ai.hand, top.image, -1)
-        updatedareas += [cards.screen.blit(top.image, (deckpos[0]+100, deckpos[1]))]
+        cut(ai.hand, top, -1)
+        updatedareas += [cards.screen.blit(top.image, (deckpos[0]+200, deckpos[1]))]
         playerstatus()
         penalties += checkmoves(top, actions)
         spare_deck.add_card(topcard)
-    topcard = top
+    topcard = top.toMed()
     penalty(ai.hand, penalties)
     if penalties == 1:
         previously("1 penalty")
@@ -368,7 +368,7 @@ def penalty(who, oops): #input hand and number of penalties
         c = (deck.deal_card())
         if who.rect.y == 100: #check if AI
             c.flip()
-        cut(who, c.image)
+        cut(who, c)
         if who.rect.y == 100:
             c.flip() #so AI will play card flipped correctly
             who.add_card(c, True)
@@ -388,23 +388,24 @@ def reversal(ishum, player): #input True if hum and false if AI, and the player 
         count = aiplayers.index(player)
 
 deal(numhumans, numais, cardsinitial) #start the game by dealing
-topcard = deck.deal_card()    #draw a card from the deck
+topcard = deck.deal_card().toMed()    #draw a card from the deck
 turnnum = 0 #count the number of turns
 updatedareas += [cards.screen.blit(deck.image, deck.rect)]
 pygame.display.update(updatedareas)
 updatedareas = []
 
-def cut(player, cardimage, mult=1):
+def cut(player, card, mult=1):
     """Move card from deck to player's hand"""
     global updatedareas
-    if mult == 1:
+    if mult == 1: #card being dealt
         cardrect = deck.rect.copy()
         goal = (player.rect.x+player.posempty[0], player.rect.y+player.posempty[1])
-    else:
-        goal = (deckpos[0]+100, deckpos[1])
+    else: #AI playing card
+        goal = (deckpos[0]+200, deckpos[1])
         cardrect = player.rect.copy()
         cardrect.x += player.posempty[0]
         cardrect.y += player.posempty[1]
+        card.toMed()
     pygame.display.update(updatedareas)
     updatedareas = []
     speed = [(goal[0]-cardrect.x), (goal[1]-cardrect.y)]
@@ -418,7 +419,7 @@ def cut(player, cardimage, mult=1):
         pygame.event.clear()
         clock.tick(90)
         eraser.blit(cards.screen, (0, 0), (cardrect.x, cardrect.y, cards.CARDW, cards.CARDH))
-        updatedareas += [cards.screen.blit(cardimage, cardrect)]
+        updatedareas += [cards.screen.blit(card.image, cardrect)]
         pygame.display.update(updatedareas)
         updatedareas = []
         updatedareas += [cards.screen.blit(eraser, cardrect)]
@@ -429,6 +430,7 @@ def cut(player, cardimage, mult=1):
 eraser = pygame.Surface((cards.width+10, cards.CARDH+20))
 eraser.fill(bg)
 previously("GLHF")
+print("The Deck is at {} with a width of {} and the topcard is at {}".format(deck.rect.x, deck.rect.width, deckpos[0]+200)) 
 while play:
     turnnum += 1
     count = 0
@@ -436,7 +438,7 @@ while play:
         if huminplay[count][0]: #skip if not in play
             previously("Human Player {}".format(count+1), (255, 255, 255))
             turn(hums[count])
-            updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
+            #updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
             cards.screen.blit(hums[count].image, hums[count].rect) #HANDYHAND
             pygame.display.update(updatedareas)
             updatedareas = []
@@ -456,12 +458,12 @@ while play:
     if not play:
         break
     while count < len(aiplayers):
-        updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
+        #updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
         if aiinplay[count][0]:
             previously("AI Player {}".format(count+1), (255, 255, 255))
             playerstatus()
             checkturn(aiplayers[count], aiplayers[count].turn(topcard, prevmovefeat, prevmovelab))
-            updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+100, deckpos[1]))]
+            updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+200, deckpos[1]))]
             if aiplayers[count].hand.isempty():
                 eprompt(guielem.ButtonPrompt("AI Player {}: GG EZ".format(count+1), cards.width/2, cards.height/2, cards.width/3, cards.height/5, "GG"))
                 play = False
