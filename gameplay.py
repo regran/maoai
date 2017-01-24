@@ -366,6 +366,7 @@ def penalty(who, oops): #input hand and number of penalties
             if deck.isempty():
                 deck = cards.Deck(pos=deckpos)
         c = (deck.deal_card())
+        c.toBig()
         if who.rect.y == 100: #check if AI
             c.flip()
         cut(who, c)
@@ -438,7 +439,7 @@ while play:
         if huminplay[count][0]: #skip if not in play
             previously("Human Player {}".format(count+1), (255, 255, 255))
             turn(hums[count])
-            #updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
+            updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
             cards.screen.blit(hums[count].image, hums[count].rect) #HANDYHAND
             pygame.display.update(updatedareas)
             updatedareas = []
@@ -458,7 +459,7 @@ while play:
     if not play:
         break
     while count < len(aiplayers):
-        #updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
+        updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
         if aiinplay[count][0]:
             previously("AI Player {}".format(count+1), (255, 255, 255))
             playerstatus()
