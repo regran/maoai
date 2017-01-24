@@ -55,7 +55,7 @@ class Card(pygame.sprite.Sprite):
         self.isback = False
 
     def toBig(self):
-        self.cardimage = card
+        self.cardimage = self.card
         self.image = self.cardimage
         self.rect = self.image.get_rect(x=self.rect.x, y=self.rect.y)
         return self
@@ -155,7 +155,7 @@ class Hand():
         """Remove a card from the hand"""
         i = self.cards.index(card)
         self.image.blit(self.image, (i*CARDW*6/5, 0), 
-                       ((i+1)*CARDW*6/5, 0, HANDW - (i+2)*CARDW*6/5, CARDH))
+                       ((i+1)*CARDW*6/5, 0, HANDW - (i+1)*CARDW*6/5, CARDH))
         for l in self.cards[i:]:
             l.rect.x = l.rect.x-CARDW*6/5
         if i == len(self.cards)-1:
