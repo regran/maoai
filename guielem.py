@@ -42,10 +42,41 @@ class Button(pygame.sprite.Sprite):
             self.inf = (175, 175, 175)
         elif pos and not click: #mouseover
             self.inf = (220, 220, 220)
-        elif (pos and not up) or not (click or pos): #mouse released and not hovering
+        elif not (click or pos): #mouse released and not hovering
             self.inf = (210,210,210)
         return newclick  #mouse released on pressed button
 
+class Arrow(pygame.sprite.Sprite):
+    def __init__(self, xycoord, upa=True):
+        if upa:
+            self.normal = pygame.image.load("uparrow.png").convert()
+            self.hover = pygame.image.load("uparrowhover.png").convert()
+            self.click = pygame.image.load("uparrowclick.png").convert()
+        else:
+            self.normal = pygame.image.load("downarrow.png").convert()
+            self.hover  = pygame.image.load("downarrowhover.png").convert()
+            self.click = pygame.image.load("downarrowclick.png").convert()
+        self.image = self.normal
+        self.rect = self.image.get_rect(x=xycoord[0], y=xycoord[1])
+        self.clicked = False
+
+    def drawA(self, surf):
+        return surf.blit(self.image, self.rect)
+
+    def is_clicked(self, up=True):
+        click = pygame.mouse.get_pressed()[0]
+        pos = self.rect.collidepoint(pygame.mouse.get_pos())
+        clicked = pos and self.clicked and not click
+        if pos and not up:
+            self.clicked = True
+            self.image = self.click
+        elif pos and not click:
+            self.image = self.hover
+            self.clicked = False
+        elif not (click or pos):
+            self.image = self.normal
+            self.clicked = False
+        return clicked
 
 
 class Prompt():

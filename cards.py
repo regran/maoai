@@ -156,6 +156,8 @@ class Hand():
                 break
         else:
             self.hands.append([card])
+            card.rect.x = self.rect.x
+            card.rect.y = self.rect.y
             self.posempty += [(CARDW*6/5, 0)]
             new = pygame.Surface((HANDW, CARDH))
             new.fill((14, 144, 14))

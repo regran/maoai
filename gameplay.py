@@ -215,9 +215,9 @@ def playerstatus(player=None):
         ai.hand.rect.x = handpos[0] + i*(cards.smallCARDW+50)
         ai.hand.rect.y = 100
         updatedareas += [cards.screen.blit(cards.cardback, ai.hand.rect)]
-        rec = font.get_rect(str(ai.numcard)) 
+        rec = font.get_rect(str(ai.hand.numcard)) 
         if rec.width > cards.smallCARDW:
-            rec=smallfont.get_rect(str(ai.numcard))
+            rec=smallfont.get_rect(str(ai.hand.numcard))
             smallfont.render_to(cards.screen, (handpos[0]+cards.smallCARDW/2-rec.width/2+i*(cards.smallCARDW+50), 100+cards.smallCARDH/2-rec.height/2), None, fgcolor=black)
         else: font.render_to(cards.screen, (handpos[0]+cards.smallCARDW/2-rec.width/2+i*(cards.smallCARDW+50), 100+cards.smallCARDH/2-rec.height/2), None, fgcolor=black)
         i += 1
@@ -239,20 +239,29 @@ def playerstatus(player=None):
     
 
 def cardselect(player):
+    global updatedareas
+    player.index = 0
     while True:
         events = pygame.event.get()
         for e in events:
+            down = not e.type==pygame.MOUSEBUTTONDOWN
+            #check arrows and break if one was clicked
+            if UpArrow.is_clicked(down) and player.index < len(player.hands)-1:
+                player.index += 1
+                updatedareas += [cards.screen.blit(player.image[player.index], player.rect)]
+                
+            elif DownArrow.is_clicked(down) and player.index>=0:
+                player.index += -1
+                updatedareas += [cards.screen.blit(player.image[player.index], player.rect)]
+            updatedareas += [DownArrow.drawA(cards.screen)]
+            updatedareas += [UpArrow.drawA(cards.screen)]
+            pygame.display.update(updatedareas)
+            updatedareas = []
             for c in player.hands[player.index]:
-                if e.type == pygame.MOUSEBUTTONDOWN:
-                    if c.is_clicked(False):
-                        return c
-                elif c.is_clicked():
+                if c.is_clicked(down):
                     return c
-            if e.type == pygame.MOUSEBUTTONDOWN:
-                if deck.is_clicked(False):
-                    return deck
-            elif deck.is_clicked():
-                    return deck
+            if deck.is_clicked(down):
+                return deck
 
 def turn(player): #input whose turn it is
     """Get input from player about move and process the player's decision based on game rules"""
@@ -262,6 +271,8 @@ def turn(player): #input whose turn it is
     updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+200, deckpos[1]))]
     digit = False
     updatedareas += [cards.screen.blit(player.image[player.index], player.rect)] #HANDYHAND
+    updatedareas += [DownArrow.drawA(cards.screen)]
+    updatedareas += [UpArrow.drawA(cards.screen)]
     playerstatus(player)
     pygame.event.clear()
     card = cardselect(player)
@@ -395,6 +406,7 @@ updatedareas += [cards.screen.blit(deck.image, deck.rect)]
 pygame.display.update(updatedareas)
 updatedareas = []
 
+
 def cut(player, card, mult=1):
     """Move card from deck to player's hand"""
     global updatedareas
@@ -430,6 +442,8 @@ def cut(player, card, mult=1):
 
 eraser = pygame.Surface((cards.width+10, cards.CARDH+20))
 eraser.fill(bg)
+UpArrow = guielem.Arrow((0,handpos[1]), True)
+DownArrow = guielem.Arrow((0, handpos[1]+90), False)
 previously("GLHF")
 print("The Deck is at {} with a width of {} and the topcard is at {}".format(deck.rect.x, deck.rect.width, deckpos[0]+200)) 
 while play:
@@ -459,7 +473,7 @@ while play:
     if not play:
         break
     while count < len(aiplayers):
-        updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
+        updatedareas += [cards.screen.blit(eraser, (0, handpos[1]-18))]
         if aiinplay[count][0]:
             previously("AI Player {}".format(count+1), (255, 255, 255))
             playerstatus()
