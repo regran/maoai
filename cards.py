@@ -13,7 +13,7 @@ smallCARD = smallCARDW, smallCARDH = 112, 157
 medCARD = medCARDW, medCARDH = 150, 210
 HANDW = 1800
 size = width, height = [1920, 1080]
-screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Mao Card Game")
 smallcards = pygame.image.load("cardimages_small.png").convert()
 medcards = pygame.image.load("cardimages_med.png").convert()
@@ -128,46 +128,60 @@ class Card(pygame.sprite.Sprite):
 class Hand():
     """A hand of cards held by a player"""
     def __init__(self, pos=(0,0)): #create empty hand
-        self.cards = []
+        self.hands = [[]]
+        self.index = 0
         self.numcard = 0
-        self.image = pygame.Surface((HANDW, CARDH))
-        self.image.fill((14, 144, 14))
-        self.rect = self.image.get_rect(x=pos[0], y=pos[1])
-        self.posempty = (0, 0)
+        self.image = [pygame.Surface((HANDW, CARDH))]
+        self.image[0].fill((14, 144, 14))
+        self.rect = self.image[0].get_rect(x=pos[0], y=pos[1])
+        self.posempty = [(0, 0)]
 
     def __str__(self):
         ans = " "
-        for i in self.cards:
-            ans += str(i)+", "
+        for i in self.hands:
+            for j in i:
+                ans += str(j)+", "
         return "Hand contains: " + ans # return a string representation of a hand
 
     def add_card(self, card, AI=False):
         """Add a card to the hand"""
-        self.cards.append(card)	# add a card object to a hand
+        for hand in range(len(self.hands)): #find a hand with an empty spot
+            if len(self.hands[hand]) < 6:
+                self.hands[hand].append(card) #add a card object to the hand
+                self.image[hand].blit(card.image, self.posempty[hand])
+                card.rect.x = self.rect.x + self.posempty[hand][0]
+                card.rect.y = self.rect.y + self.posempty[hand][1]
+                if not AI:
+                    self.posempty[hand] = (self.posempty[hand][0]+CARDW*6/5, 0)
+                break
+        else:
+            self.hands.append([card])
+            self.posempty += [(CARDW*6/5, 0)]
+            new = pygame.Surface((HANDW, CARDH))
+            new.fill((14, 144, 14))
+            self.image += [new]
         self.numcard += 1
-        self.image.blit(card.image, self.posempty)
-        card.rect.x = self.rect.x + self.posempty[0]
-        card.rect.y = self.rect.y + self.posempty[1]
-        if not AI:
-            self.posempty = (self.posempty[0]+CARDW*6/5, 0)
+        print(self)
+        print(self.hands)
 
     def rem_card(self, card, AI=False):
         """Remove a card from the hand"""
-        i = self.cards.index(card)
-        self.image.blit(self.image, (i*CARDW*6/5, 0), 
+        i = self.hands[self.index].index(card)
+        self.image[self.index].blit(self.image[self.index], (i*CARDW*6/5, 0), 
                        ((i+1)*CARDW*6/5, 0, HANDW - (i+1)*CARDW*6/5, CARDH))
-        for l in self.cards[i:]:
+        for l in self.hands[self.index][i:]:
             l.rect.x = l.rect.x-CARDW*6/5
-        if i == len(self.cards)-1:
-            self.image.blit(self.cards[self.numcard-2].image, ((self.numcard-2)*CARDW*6/5, 0))
-        self.cards.remove(card)
+        if i == self.numcard-1:
+            self.image[self.index].blit(self.hands[self.index][self.numcard-2].image, ((self.numcard-2)*CARDW*6/5, 0))
+        self.hands[self.index].remove(card)
+        print(self)
         self.numcard += -1
         if not AI:
-            self.posempty = (self.posempty[0]-CARDW*6/5, 0)
+            self.posempty[self.index] = (self.posempty[self.index][0]-CARDW*6/5, 0)
 
     def isempty(self):
         """Check if the hand is empty"""
-        return self.cards == []
+        return self.numcard == 0
 
 class Deck(Card):
     """A traditional deck of playing cards (without jokers)"""

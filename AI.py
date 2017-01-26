@@ -13,12 +13,16 @@ class AI:
         print(topcard)
         print(self.hand)
         validturn = True
-        for card in self.hand.cards:
-            if card.rank == topcard.rank or card.suit == topcard.suit:
-                self.hand.rem_card(card, True)
-                print("Card played is {}".format(card))
-                topcard = card
-                break
+        for h in self.hand.hands:
+            for card in h:
+                if card.rank == topcard.rank or card.suit == topcard.suit:
+                    self.hand.rem_card(card, True)
+                    print("Card played is {}".format(card))
+                    topcard = card
+                    break
+            else:
+                continue
+            break
         else:
             validturn = False
         return topcard, validturn

@@ -155,7 +155,7 @@ handpos = (100, 900)
 
 lines = []
 colors = []
-prevrec = pygame.Rect(cards.width*7/10, 150+cards.smallCARDH, cards.width*3/10, handpos[1]-150-cards.CARDH-20)
+prevrec = pygame.Rect(cards.width*7/10, 150+cards.smallCARDH, cards.width*3/10, handpos[1]-50-150-cards.smallCARDH)
 def previously(newtext, color=black):
     global lines, updatedareas, colors
     back = pygame.Surface((prevrec.width, prevrec.height+20))
@@ -215,9 +215,9 @@ def playerstatus(player=None):
         ai.hand.rect.x = handpos[0] + i*(cards.smallCARDW+50)
         ai.hand.rect.y = 100
         updatedareas += [cards.screen.blit(cards.cardback, ai.hand.rect)]
-        rec = font.get_rect(str(len(ai.hand.cards))) 
+        rec = font.get_rect(str(ai.numcard)) 
         if rec.width > cards.smallCARDW:
-            rec=smallfont.get_rect(str(len(hum.cards)))
+            rec=smallfont.get_rect(str(ai.numcard))
             smallfont.render_to(cards.screen, (handpos[0]+cards.smallCARDW/2-rec.width/2+i*(cards.smallCARDW+50), 100+cards.smallCARDH/2-rec.height/2), None, fgcolor=black)
         else: font.render_to(cards.screen, (handpos[0]+cards.smallCARDW/2-rec.width/2+i*(cards.smallCARDW+50), 100+cards.smallCARDH/2-rec.height/2), None, fgcolor=black)
         i += 1
@@ -225,9 +225,9 @@ def playerstatus(player=None):
         if hum == player:
             continue
         updatedareas += [cards.screen.blit(cards.cardback, (handpos[0]+i*(cards.smallCARDW+50), 100))]
-        rec = font.get_rect(str(len(hum.cards)))
+        rec = font.get_rect(str(hum.numcard))
         if rec.width>cards.smallCARDW:
-            rec=smallfont.get_rect(str(len(hum.cards)))
+            rec=smallfont.get_rect(str(hum.numcard))
             smallfont.render_to(cards.screen, (handpos[0]+cards.smallCARDW/2-rec.width/2+i*(cards.smallCARDW+50), 100+cards.smallCARDH/2-rec.height/2), None, fgcolor=black)
         else: font.render_to(cards.screen, (handpos[0]+cards.smallCARDW/2-rec.width/2+i*(cards.smallCARDW+50), 100+cards.smallCARDH/2-rec.height/2), None, fgcolor=black)
         i += 1
@@ -242,7 +242,7 @@ def cardselect(player):
     while True:
         events = pygame.event.get()
         for e in events:
-            for c in player.cards:
+            for c in player.hands[player.index]:
                 if e.type == pygame.MOUSEBUTTONDOWN:
                     if c.is_clicked(False):
                         return c
@@ -261,7 +261,7 @@ def turn(player): #input whose turn it is
     validturn = True
     updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+200, deckpos[1]))]
     digit = False
-    updatedareas += [cards.screen.blit(player.image, player.rect)] #HANDYHAND
+    updatedareas += [cards.screen.blit(player.image[player.index], player.rect)] #HANDYHAND
     playerstatus(player)
     pygame.event.clear()
     card = cardselect(player)
@@ -400,12 +400,12 @@ def cut(player, card, mult=1):
     global updatedareas
     if mult == 1: #card being dealt
         cardrect = deck.rect.copy()
-        goal = (player.rect.x+player.posempty[0], player.rect.y+player.posempty[1])
+        goal = (player.rect.x+player.posempty[player.index][0], player.rect.y+player.posempty[player.index][1])
     else: #AI playing card
         goal = (deckpos[0]+200, deckpos[1])
         cardrect = player.rect.copy()
-        cardrect.x += player.posempty[0]
-        cardrect.y += player.posempty[1]
+        cardrect.x += player.posempty[player.index][0]
+        cardrect.y += player.posempty[player.index][1]
         card.toMed()
     pygame.display.update(updatedareas)
     updatedareas = []
@@ -440,7 +440,7 @@ while play:
             previously("Human Player {}".format(count+1), (255, 255, 255))
             turn(hums[count])
             updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
-            cards.screen.blit(hums[count].image, hums[count].rect) #HANDYHAND
+            cards.screen.blit(hums[count].image[hums[count].index], hums[count].rect) #HANDYHAND
             pygame.display.update(updatedareas)
             updatedareas = []
             if hums[count].isempty():
