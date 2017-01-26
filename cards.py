@@ -177,13 +177,11 @@ class Hand():
                        ((i+1)*CARDW*6/5, 0, HANDW - (i+1)*CARDW*6/5, CARDH))
         for l in self.hands[self.index][i:]:
             l.rect.x = l.rect.x-CARDW*6/5
-        if i == self.numcard-1:
-            self.image[self.index].blit(self.hands[self.index][self.numcard-2].image, ((self.numcard-2)*CARDW*6/5, 0))
         self.hands[self.index].remove(card)
         print(self)
         self.numcard += -1
         if self.hands[self.index] == []:
-            self.hands.remove(self.hand[self.index])
+            self.hands.remove(self.hands[self.index])
             self.image.remove(self.image[self.index])
             self.posempty.remove(self.posempty[self.index])
         elif not AI:

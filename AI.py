@@ -13,8 +13,9 @@ class AI:
         print(topcard)
         print(self.hand)
         validturn = True
-        for h in self.hand.hands:
-            for card in h:
+        for h in range(len(self.hand.hands)):
+            self.hand.index = h
+            for card in self.hand.hands[self.hand.index]:
                 if card.rank == topcard.rank or card.suit == topcard.suit:
                     self.hand.rem_card(card, True)
                     print("Card played is {}".format(card))
