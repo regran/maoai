@@ -246,11 +246,11 @@ def cardselect(player):
         for e in events:
             down = not e.type==pygame.MOUSEBUTTONDOWN
             #check arrows and break if one was clicked
-            if UpArrow.is_clicked(down) and player.index < len(player.hands)-1:
+            if DownArrow.is_clicked(down) and player.index < len(player.hands)-1:
                 player.index += 1
                 updatedareas += [cards.screen.blit(player.image[player.index], player.rect)]
                 
-            elif DownArrow.is_clicked(down) and player.index>=0:
+            elif UpArrow.is_clicked(down) and player.index>0:
                 player.index += -1
                 updatedareas += [cards.screen.blit(player.image[player.index], player.rect)]
             updatedareas += [DownArrow.drawA(cards.screen)]
@@ -367,7 +367,7 @@ def skip(ishum, howlong):
 
 def penalty(who, oops): #input hand and number of penalties
     """Add a card to a player's hand for each penalty"""
-    global deck, spare_deck
+    global deck, spare_deck, updatedareas
     for i in range(oops):
         if deck.isempty(): #check if the deck is empty
             deck = spare_deck #either use previously played cards or, if none, add a new deck
@@ -380,11 +380,16 @@ def penalty(who, oops): #input hand and number of penalties
         c.toBig()
         if who.rect.y == 100: #check if AI
             c.flip()
+        else:
+            updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
+            updatedareas += [cards.screen.blit(who.image[who.index], who.rect)]
         cut(who, c)
         if who.rect.y == 100:
             c.flip() #so AI will play card flipped correctly
             who.add_card(c, True)
-        else: who.add_card(c)
+        else: 
+            who.add_card(c)
+            updatedareas += [cards.screen.blit(who.image[who.index], who.rect)]
         playerstatus(who)
 
 def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is

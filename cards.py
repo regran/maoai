@@ -158,9 +158,13 @@ class Hand():
             self.hands.append([card])
             card.rect.x = self.rect.x
             card.rect.y = self.rect.y
-            self.posempty += [(CARDW*6/5, 0)]
+            if not AI:
+                self.posempty += [(CARDW*6/5, 0)]
+            else:
+                self.posempty += [(0,0)]
             new = pygame.Surface((HANDW, CARDH))
             new.fill((14, 144, 14))
+            new.blit(card.image, (0,0))
             self.image += [new]
         self.numcard += 1
         print(self)
@@ -178,7 +182,11 @@ class Hand():
         self.hands[self.index].remove(card)
         print(self)
         self.numcard += -1
-        if not AI:
+        if self.hands[self.index] == []:
+            self.hands.remove(self.hand[self.index])
+            self.image.remove(self.image[self.index])
+            self.posempty.remove(self.posempty[self.index])
+        elif not AI:
             self.posempty[self.index] = (self.posempty[self.index][0]-CARDW*6/5, 0)
 
     def isempty(self):
