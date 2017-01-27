@@ -460,6 +460,7 @@ while play:
             turn(hums[count])
             updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
             cards.screen.blit(hums[count].image[hums[count].index], hums[count].rect) #HANDYHAND
+            updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+200, deckpos[1]))]
             pygame.display.update(updatedareas)
             updatedareas = []
             if hums[count].isempty():
