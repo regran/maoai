@@ -240,7 +240,6 @@ def playerstatus(player=None):
 
 def cardselect(player):
     global updatedareas
-    player.index = 0
     while True:
         events = pygame.event.get()
         for e in events:
@@ -250,11 +249,13 @@ def cardselect(player):
                 if player.index < len(player.hands)-1: player.index += 1
                 else: player.index = 0
                 updatedareas += [cards.screen.blit(player.image[player.index], player.rect)]
+                updatedareas += [font.render_to(cards.screen, (player.rect.x+cards.CARDW*6*6/5, player.rect.y), str(player.index+1) + "/" + str(len(player.hands)), fgcolor=(255,168,0))]
                 
             elif UpArrow.is_clicked(down):
                 if player.index>0: player.index += -1
                 else: player.index = len(player.hands) -1
                 updatedareas += [cards.screen.blit(player.image[player.index], player.rect)]
+                updatedareas += [font.render_to(cards.screen, (player.rect.x+cards.CARDW*6*6/5, player.rect.y), str(player.index+1) + "/" + str(len(player.hands)), fgcolor=(255,168,0))]
             updatedareas += [DownArrow.drawA(cards.screen)]
             updatedareas += [UpArrow.drawA(cards.screen)]
             pygame.display.update(updatedareas)
@@ -272,9 +273,11 @@ def turn(player): #input whose turn it is
     validturn = True
     updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+200, deckpos[1]))]
     digit = False
+    player.index = 0
     updatedareas += [cards.screen.blit(player.image[player.index], player.rect)] #HANDYHAND
     updatedareas += [DownArrow.drawA(cards.screen)]
     updatedareas += [UpArrow.drawA(cards.screen)]
+    updatedareas += [font.render_to(cards.screen, (player.rect.x+cards.CARDW*6*6/5, player.rect.y), str(player.index+1) + "/" + str(len(player.hands)), fgcolor=(255,168,0))]
     playerstatus(player)
     pygame.event.clear()
     card = cardselect(player)
