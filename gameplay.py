@@ -159,7 +159,7 @@ prevrec = pygame.Rect(cards.width*7/10, 150+cards.smallCARDH, cards.width*3/10, 
 def previously(newtext, color=black):
     global lines, updatedareas, colors
     back = pygame.Surface((prevrec.width, prevrec.height+20))
-    back.fill((155,155,155))
+    back.fill((170, 90, 0))
     newl = guielem.wrapline(smallfont, newtext, prevrec)
     for n in newl:
         colors += [color]
@@ -249,13 +249,13 @@ def cardselect(player):
                 if player.index < len(player.hands)-1: player.index += 1
                 else: player.index = 0
                 updatedareas += [cards.screen.blit(player.image[player.index], player.rect)]
-                updatedareas += [font.render_to(cards.screen, (player.rect.x+cards.CARDW*6*6/5, player.rect.y), str(player.index+1) + "/" + str(len(player.hands)), fgcolor=(255,168,0))]
+                updatedareas += [font.render_to(cards.screen, (player.rect.x+cards.CARDW*6*6/5, player.rect.y+90), str(player.index+1) + "/" + str(len(player.hands)), fgcolor=(255,158,0))]
                 
             elif UpArrow.is_clicked(down):
                 if player.index>0: player.index += -1
                 else: player.index = len(player.hands) -1
                 updatedareas += [cards.screen.blit(player.image[player.index], player.rect)]
-                updatedareas += [font.render_to(cards.screen, (player.rect.x+cards.CARDW*6*6/5, player.rect.y), str(player.index+1) + "/" + str(len(player.hands)), fgcolor=(255,168,0))]
+                updatedareas += [font.render_to(cards.screen, (player.rect.x+cards.CARDW*6*6/5, player.rect.y+90), str(player.index+1) + "/" + str(len(player.hands)), fgcolor=(255,158,0))]
             updatedareas += [DownArrow.drawA(cards.screen)]
             updatedareas += [UpArrow.drawA(cards.screen)]
             pygame.display.update(updatedareas)
@@ -277,7 +277,7 @@ def turn(player): #input whose turn it is
     updatedareas += [cards.screen.blit(player.image[player.index], player.rect)] #HANDYHAND
     updatedareas += [DownArrow.drawA(cards.screen)]
     updatedareas += [UpArrow.drawA(cards.screen)]
-    updatedareas += [font.render_to(cards.screen, (player.rect.x+cards.CARDW*6*6/5, player.rect.y), str(player.index+1) + "/" + str(len(player.hands)), fgcolor=(255,168,0))]
+    updatedareas += [font.render_to(cards.screen, (player.rect.x+cards.CARDW*6*6/5, player.rect.y+90), str(player.index+1) + "/" + str(len(player.hands)), fgcolor=(255,158,0))]
     playerstatus(player)
     pygame.event.clear()
     card = cardselect(player)
@@ -304,6 +304,7 @@ def turn(player): #input whose turn it is
         topcard = card.toMed()
         player.rem_card(card)
         previously("Played {}".format(card))
+    updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+200, deckpos[1]))]
     penalty(player, penalties)
     if penalties == 1:
         previously("1 penalty")
@@ -388,6 +389,7 @@ def penalty(who, oops): #input hand and number of penalties
         else:
             updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
             updatedareas += [cards.screen.blit(who.image[who.index], who.rect)]
+            updatedareas += [font.render_to(cards.screen, (who.rect.x+cards.CARDW*6*6/5, who.rect.y+90), str(who.index+1) + "/" + str(len(who.hands)), fgcolor=(255,158,0))]
         cut(who, c)
         if who.rect.y == 100:
             c.flip() #so AI will play card flipped correctly
@@ -395,6 +397,7 @@ def penalty(who, oops): #input hand and number of penalties
         else: 
             who.add_card(c)
             updatedareas += [cards.screen.blit(who.image[who.index], who.rect)]
+            updatedareas += [font.render_to(cards.screen, (who.rect.x+cards.CARDW*6*6/5, who.rect.y+90), str(who.index+1) + "/" + str(len(who.hands)), fgcolor=(255,158,0))]
         playerstatus(who)
 
 def reversal(ishum, player): #input True if hum and false if AI, and the player whose turn it is
@@ -463,7 +466,7 @@ while play:
             turn(hums[count])
             updatedareas += [cards.screen.blit(eraser, (handpos[0]-5, handpos[1]-18))]
             cards.screen.blit(hums[count].image[hums[count].index], hums[count].rect) #HANDYHAND
-            updatedareas += [cards.screen.blit(topcard.image, (deckpos[0]+200, deckpos[1]))]
+            updatedareas += [font.render_to(cards.screen, (hums[count].rect.x+cards.CARDW*6*6/5, hums[count].rect.y+90), str(hums[count].index+1) + "/" + str(len(hums[count].hands)), fgcolor=(255,158,0))]
             pygame.display.update(updatedareas)
             updatedareas = []
             if hums[count].isempty():
