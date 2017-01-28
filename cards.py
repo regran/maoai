@@ -11,9 +11,9 @@ RANKS = ('Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', '
 CARD = CARDW, CARDH = 225, 315
 smallCARD = smallCARDW, smallCARDH = 112, 157
 medCARD = medCARDW, medCARDH = 150, 210
-HANDW = 1800
+HANDW = 7*6/5*CARDW
 size = width, height = [1920, 1080]
-screen = pygame.display.set_mode(size)
+screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 pygame.display.set_caption("Mao Card Game")
 smallcards = pygame.image.load("cardimages_small.png").convert()
 medcards = pygame.image.load("cardimages_med.png").convert()
@@ -168,13 +168,12 @@ class Hand():
             self.image += [new]
         self.numcard += 1
         print(self)
-        print(self.hands)
 
     def rem_card(self, card, AI=False):
         """Remove a card from the hand"""
         i = self.hands[self.index].index(card)
         self.image[self.index].blit(self.image[self.index], (i*CARDW*6/5, 0), 
-                       ((i+1)*CARDW*6/5, 0, HANDW - (i+1)*CARDW*6/5, CARDH))
+                       ((i+1)*CARDW*6/5, 0, (6-i)*CARDW*6/5, CARDH))
         for l in self.hands[self.index][i:]:
             l.rect.x = l.rect.x-CARDW*6/5
         self.hands[self.index].remove(card)
@@ -184,6 +183,14 @@ class Hand():
             self.hands.remove(self.hands[self.index])
             self.image.remove(self.image[self.index])
             self.posempty.remove(self.posempty[self.index])
+            self.index = 0
+            if len(self.hands) == 0:
+                new = pygame.Surface((HANDW, CARDH))
+                new.fill((14, 144, 14))
+                self.image += [new]
+                self.hands = [[]]
+                self.posempty += [(0,0)]
+
         elif not AI:
             self.posempty[self.index] = (self.posempty[self.index][0]-CARDW*6/5, 0)
 
