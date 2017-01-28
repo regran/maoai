@@ -246,12 +246,14 @@ def cardselect(player):
         for e in events:
             down = not e.type==pygame.MOUSEBUTTONDOWN
             #check arrows and break if one was clicked
-            if DownArrow.is_clicked(down) and player.index < len(player.hands)-1:
-                player.index += 1
+            if DownArrow.is_clicked(down):
+                if player.index < len(player.hands)-1: player.index += 1
+                else: player.index = 0
                 updatedareas += [cards.screen.blit(player.image[player.index], player.rect)]
                 
-            elif UpArrow.is_clicked(down) and player.index>0:
-                player.index += -1
+            elif UpArrow.is_clicked(down):
+                if player.index>0: player.index += -1
+                else: player.index = len(player.hands) -1
                 updatedareas += [cards.screen.blit(player.image[player.index], player.rect)]
             updatedareas += [DownArrow.drawA(cards.screen)]
             updatedareas += [UpArrow.drawA(cards.screen)]
@@ -421,8 +423,6 @@ def cut(player, card, mult=1):
     else: #AI playing card
         goal = (deckpos[0]+200, deckpos[1])
         cardrect = player.rect.copy()
-        cardrect.x += player.posempty[player.index][0]
-        cardrect.y += player.posempty[player.index][1]
         card.toMed()
     pygame.display.update(updatedareas)
     updatedareas = []
