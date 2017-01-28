@@ -167,7 +167,6 @@ class Hand():
             new.blit(card.image, (0,0))
             self.image += [new]
         self.numcard += 1
-        print(self)
 
     def rem_card(self, card, AI=False):
         """Remove a card from the hand"""
@@ -177,7 +176,6 @@ class Hand():
         for l in self.hands[self.index][i:]:
             l.rect.x = l.rect.x-CARDW*6/5
         self.hands[self.index].remove(card)
-        print(self)
         self.numcard += -1
         if self.hands[self.index] == []:
             self.hands.remove(self.hands[self.index])

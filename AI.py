@@ -10,15 +10,12 @@ class AI:
 
     def card_select(self, topcard):
         """Play an appropriate card, if there is one"""
-        print(topcard)
-        print(self.hand)
         validturn = True
         for h in range(len(self.hand.hands)):
             self.hand.index = h
             for card in self.hand.hands[self.hand.index]:
                 if card.rank == topcard.rank or card.suit == topcard.suit:
                     self.hand.rem_card(card, True)
-                    print("Card played is {}".format(card))
                     topcard = card
                     break
             else:
@@ -49,7 +46,6 @@ class AIperf(AI):
             for i in list(self.s.keys()):
                 if s == i:
                     actions += [self.s[i]]
-        print("The actions are: ", actions)
         return card, actions
 
 class AIplay(AI):
@@ -121,8 +117,5 @@ class AIplay(AI):
         else:
             return topcard, []
         if validturn and f != []:
-            print("The previous features are", f)
-            print("The previous labels are", l)
             actions = self.predict(X, f, l)
-            print("Predicted actions are {}".format(actions))
         return topcard, actions

@@ -110,36 +110,6 @@ if numhumans + numais + numperf < 2:
 rankrules = {'5': "highfive", 'King':"bow", 'Queen': "bow", '7':'nice'}
 suitrules = {'Hearts': "ily", 'Spades':"rave", 'Diamonds':'sparkly'}
 
-#keeping here in case I want to implement grahical custom rules
-"""
-inp = input("Would you like a custom set of rules? (Y/N) If no, a default will be used. ").lower()
-if inp == "y":
-    rankrules = {}
-    suitrules = {}
-    print( "Enter rules in the format \"(Rank/Suit) (Rule)\"" \
-           "\nFor example, \"5 highfive\"" \
-           "\nSuits are {}" \
-           "\nRanks are {}" \
-           "\nThere can only be one rule per suit or rank." \
-           "\nEnter \"Start\" to finish rule entry and begin the game".format(cards.SUITS, cards.RANKS))
-    while True:
-        inp = input("Rule: ").split()
-        if inp[0] == "Start":
-            break
-        if len(inp) != 2:
-            print("Two words were expected. Please try again or say \"Start\"")
-            continue
-        if inp[0] in cards.SUITS: 
-            suitrules.update({inp[0]:inp[1]})
-        elif inp[0] in cards.RANKS:
-            rankrules.update({inp[0]:inp[1]})
-        else:
-            print("That is not a valid suit or rank. Note that entry is case sensitive. Please try again or say \"Start\"")
-            continue 
-elif not inp=='n':
-    print("Y/N was expected.")
-    exit()
-"""
 numplayers = numhumans+numais
 cardsinitial = 5
 hums = []
@@ -456,7 +426,6 @@ eraser.fill(bg)
 UpArrow = guielem.Arrow((0,handpos[1]), True)
 DownArrow = guielem.Arrow((0, handpos[1]+90), False)
 previously("GLHF")
-print("The Deck is at {} with a width of {} and the topcard is at {}".format(deck.rect.x, deck.rect.width, deckpos[0]+200)) 
 while play:
     turnnum += 1
     count = 0
