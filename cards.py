@@ -8,11 +8,13 @@ VALUES = {'Ace':1, '2':2, '3':3, '4':4, '5':5, '6':6, '7':7, '8':8, '9':9,
           '10':10, 'Jack':10, 'Queen':10, 'King':10}
 RANKS = ('Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King')
 
+size = width, height = [1920, 1080]
 CARD = CARDW, CARDH = 225, 315
 smallCARD = smallCARDW, smallCARDH = 112, 157
 medCARD = medCARDW, medCARDH = 150, 210
-HANDW = 7*6/5*CARDW
-size = width, height = [1920, 1080]
+cardsinhand = int((width-100)/CARDW*5/6) 
+print(cardsinhand)
+HANDW = (cardsinhand+1)*6/5*CARDW
 screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 pygame.display.set_caption("Mao Card Game")
 smallcards = pygame.image.load("cardimages_small.png").convert()
@@ -146,7 +148,7 @@ class Hand():
     def add_card(self, card, AI=False):
         """Add a card to the hand"""
         for hand in range(len(self.hands)): #find a hand with an empty spot
-            if len(self.hands[hand]) < 6:
+            if len(self.hands[hand]) < cardsinhand:
                 self.hands[hand].append(card) #add a card object to the hand
                 self.image[hand].blit(card.image, self.posempty[hand])
                 card.rect.x = self.rect.x + self.posempty[hand][0]
@@ -172,7 +174,7 @@ class Hand():
         """Remove a card from the hand"""
         i = self.hands[self.index].index(card)
         self.image[self.index].blit(self.image[self.index], (i*CARDW*6/5, 0), 
-                       ((i+1)*CARDW*6/5, 0, (6-i)*CARDW*6/5, CARDH))
+                       ((i+1)*CARDW*6/5, 0, (cardsinhand-i)*CARDW*6/5, CARDH))
         for l in self.hands[self.index][i:]:
             l.rect.x = l.rect.x-CARDW*6/5
         self.hands[self.index].remove(card)
