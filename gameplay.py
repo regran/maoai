@@ -110,6 +110,8 @@ if numhumans + numais + numperf < 2:
 rankrules = {'5': "highfive", 'King':"bow", 'Queen': "bow", '7':'nice'}
 suitrules = {'Hearts': "ily", 'Spades':"rave", 'Diamonds':'sparkly'}
 
+    
+
 numplayers = numhumans+numais
 cardsinitial = 5
 hums = []
