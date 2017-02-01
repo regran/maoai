@@ -13,7 +13,6 @@ CARD = CARDW, CARDH = 225, 315
 smallCARD = smallCARDW, smallCARDH = 112, 157
 medCARD = medCARDW, medCARDH = 150, 210
 cardsinhand = int((width-100)/CARDW*5/6) 
-print(cardsinhand)
 HANDW = (cardsinhand+1)*6/5*CARDW
 screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
 pygame.display.set_caption("Mao Card Game")
