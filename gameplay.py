@@ -9,6 +9,11 @@ import eztext, guielem
 import threading
 pygame.init()
 
+#dicts of default rules based on rank and suit
+rankrules = {'5': "highfive", 'King':"bow", 'Queen': "bow", '7':'nice'}
+suitrules = {'Hearts': "ily", 'Spades':"rave", 'Diamonds':'sparkly'}
+
+
 red = 255, 0, 0
 blue = 0, 0, 255
 green = 0, 255, 0
@@ -105,10 +110,6 @@ if numhumans + numais + numperf < 2:
     eprompt(guielem.ButtonPrompt("That isn't a valid number of players. Think about what a sad and lonely person you are. ", cards.width/2, cards.height/2, cards.width/3, cards.height/5, "Exit"))
     play = False
     exit()
-
-#dicts of default rules based on rank and suit
-rankrules = {'5': "highfive", 'King':"bow", 'Queen': "bow", '7':'nice'}
-suitrules = {'Hearts': "ily", 'Spades':"rave", 'Diamonds':'sparkly'}
 
     
 
